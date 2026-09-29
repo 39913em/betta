@@ -26,9 +26,7 @@ const CFG = {
 };
 
 // ===== PLANOS: banda de nado del pez (plano 2) =====
-const SWIM_BAND = { topFrac: 0.08, botFrac: 0.93 };
-const WATER_FLOOR_FRAC = 0.91;
-const DEPTH_MIN=1, DEPTH_MAX=5;
+const SWIM_BAND = { topFrac: 0.10, botFrac: 0.72 };
 const MAX_BETTAS = 5;
 const BIRTH_VARIANTS = ['original','superDelta','halfmoon','roseTail','crowntail'];
 let reproductionComplete = false;
@@ -140,20 +138,20 @@ function buildSwamp(){
      ========================================================== */
 
   const water=c.createLinearGradient(0,0,0,H);
-  water.addColorStop(0,'#101a18');
-  water.addColorStop(0.10,'#182824');
-  water.addColorStop(0.28,'#17372d');
-  water.addColorStop(0.52,'#102a20');
-  water.addColorStop(0.76,'#0b1d15');
-  water.addColorStop(1,'#050c08');
+  water.addColorStop(0,'#c8d0c9');
+  water.addColorStop(0.08,'#83968d');
+  water.addColorStop(0.30,'#4b6659');
+  water.addColorStop(0.62,'#233c2f');
+  water.addColorStop(0.86,'#14251c');
+  water.addColorStop(1,'#0a120d');
   c.fillStyle=water;
   c.fillRect(0,0,W,H);
 
   /* fondo difuso, sin rayos de luz */
   const haze=c.createLinearGradient(0,0,0,H*0.55);
-  haze.addColorStop(0,'rgba(150,190,170,0.10)');
-  haze.addColorStop(0.30,'rgba(75,125,100,0.06)');
-  haze.addColorStop(1,'rgba(5,18,12,0)');
+  haze.addColorStop(0,'rgba(240,245,238,0.22)');
+  haze.addColorStop(0.35,'rgba(180,205,190,0.08)');
+  haze.addColorStop(1,'rgba(20,35,25,0)');
   c.fillStyle=haze;
   c.fillRect(0,0,W,H*0.65);
 
@@ -176,60 +174,6 @@ function buildSwamp(){
     );
     c.stroke();
   }
-
-  /* ==========================================================
-     PLANO 5 — profundidad espacial
-     No es un plano muerto: es agua con vida distante.
-     Vegetación, masas de hojas y ramas pierden contraste por
-     distancia, pero conservan volumen y presencia.
-     ========================================================== */
-  for(let i=0;i<42;i++){
-    const x=W*(.01+Math.random()*.98);
-    const base=H*(.72+Math.random()*.22);
-    const h=H*(.16+Math.random()*.34);
-    const sway=(Math.random()-.5)*28*dpr;
-    c.strokeStyle=`rgba(${18+Math.random()*20|0},${43+Math.random()*35|0},${34+Math.random()*28|0},${.22+Math.random()*.18})`;
-    c.lineWidth=(1+Math.random()*2.2)*dpr;
-    c.beginPath();
-    c.moveTo(x,base);
-    c.quadraticCurveTo(x+sway*.35,base-h*.45,x+sway,base-h);
-    c.stroke();
-  }
-  for(let i=0;i<70;i++){
-    const x=W*(.02+Math.random()*.96);
-    const y=H*(.18+Math.random()*.53);
-    const rx=(5+Math.random()*14)*dpr;
-    const ry=(3+Math.random()*8)*dpr;
-    c.save();
-    c.translate(x,y);
-    c.rotate((Math.random()-.5)*1.5);
-    c.fillStyle=`rgba(${20+Math.random()*24|0},${48+Math.random()*38|0},${34+Math.random()*28|0},${.10+Math.random()*.14})`;
-    c.beginPath();
-    c.ellipse(0,0,rx,ry,0,0,Math.PI*2);
-    c.fill();
-    c.restore();
-  }
-  /* Cortina baja del plano 5: profundidad espacial, no vacío. */
-  for(let i=0;i<36;i++){
-    const x=W*(.02+Math.random()*.96);
-    const base=H*(.82+Math.random()*.10);
-    const h=H*(.07+Math.random()*.17);
-    c.strokeStyle=`rgba(${20+Math.random()*22|0},${52+Math.random()*42|0},${34+Math.random()*30|0},${.12+Math.random()*.13})`;
-    c.lineWidth=(.7+Math.random()*1.4)*dpr;
-    c.beginPath();
-    c.moveTo(x,base);
-    c.quadraticCurveTo(x+(Math.random()-.5)*20*dpr,base-h*.5,x+(Math.random()-.5)*34*dpr,base-h);
-    c.stroke();
-  }
-
-  /* leve masa azul-verde de distancia: llena el plano sin crear
-     una división artificial entre planos. */
-  const farMist=c.createRadialGradient(W*.52,H*.42,0,W*.52,H*.42,W*.62);
-  farMist.addColorStop(0,'rgba(70,112,96,.055)');
-  farMist.addColorStop(.55,'rgba(35,70,57,.035)');
-  farMist.addColorStop(1,'rgba(0,0,0,0)');
-  c.fillStyle=farMist;
-  c.fillRect(0,0,W,H*.78);
 
   /* ==========================================================
      MADERA CENTRAL — estructura orgánica inspirada en la foto
@@ -374,68 +318,6 @@ function buildSwamp(){
     c.fillStyle=`rgba(${50+Math.random()*55|0},${100+Math.random()*95|0},${35+Math.random()*45|0},${0.45+Math.random()*0.45})`;
     c.beginPath(); c.ellipse(0,0,rx,ry,0,0,Math.PI*2); c.fill();
     c.restore();
-  }
-
-
-  /* ==========================================================
-     DIVERSIDAD BOTÁNICA — noche
-     Vallisneria, cryptocoryne, anubias, musgo, tallos finos
-     y pequeñas hojas. No son rayos de luz: son volumen vegetal.
-     ========================================================== */
-  function leaf(x,y,rx,ry,rot,col,alpha){
-    c.save(); c.translate(x,y); c.rotate(rot);
-    c.fillStyle=`${col}${alpha})`;
-    c.beginPath(); c.ellipse(0,0,rx,ry,0,0,Math.PI*2); c.fill();
-    c.restore();
-  }
-  function stem(x,base,h,lean,col,w){
-    c.strokeStyle=col; c.lineWidth=w*dpr; c.lineCap='round';
-    c.beginPath(); c.moveTo(x,base); c.quadraticCurveTo(x+lean*.45,base-h*.5,x+lean,base-h); c.stroke();
-  }
-  /* Vallisneria finísima en grupos */
-  for(let g=0;g<16;g++){
-    const x=W*(.03+Math.random()*.94), base=H*(.90+Math.random()*.06);
-    for(let k=0;k<6+Math.floor(Math.random()*7);k++){
-      const h=H*(.12+Math.random()*.28), lean=(Math.random()-.5)*55;
-      stem(x+(Math.random()-.5)*18,base,h,lean,`rgba(${35+Math.random()*35|0},${88+Math.random()*65|0},${40+Math.random()*45|0},${.35+Math.random()*.35})`,.7+Math.random()*1.5);
-    }
-  }
-  /* Anubias / hojas anchas alrededor del tronco */
-  for(let i=0;i<115;i++){
-    const x=W*(.28+Math.random()*.46), y=H*(.39+Math.random()*.43);
-    const rx=(4+Math.random()*10)*dpr, ry=(2.5+Math.random()*7)*dpr;
-    const greens=[
-      'rgba(31,72,39,', 'rgba(42,92,46,', 'rgba(53,111,53,',
-      'rgba(67,122,57,', 'rgba(26,63,39,', 'rgba(77,132,63,'
-    ];
-    leaf(x,y,rx,ry,(Math.random()-.5)*1.7,greens[Math.floor(Math.random()*greens.length)],.32+Math.random()*.34);
-  }
-  /* Cryptocoryne baja: hojas onduladas, no césped uniforme */
-  for(let g=0;g<24;g++){
-    const x=W*(.05+Math.random()*.9), base=H*(.88+Math.random()*.07);
-    const count=4+Math.floor(Math.random()*5);
-    for(let k=0;k<count;k++){
-      const h=H*(.045+Math.random()*.13), lean=(Math.random()-.5)*30;
-      c.strokeStyle=`rgba(${48+Math.random()*38|0},${75+Math.random()*75|0},${32+Math.random()*38|0},${.34+Math.random()*.30})`;
-      c.lineWidth=(1.2+Math.random()*2)*dpr;
-      c.beginPath(); c.moveTo(x+(Math.random()-.5)*18,base);
-      c.quadraticCurveTo(x+lean,base-h*.45,x+lean*1.3,base-h); c.stroke();
-    }
-  }
-  /* Musgo adherido a ramas y raíces */
-  for(let i=0;i<180;i++){
-    const x=W*(.08+Math.random()*.84), y=H*(.55+Math.random()*.38);
-    const rr=(.7+Math.random()*2.8)*dpr;
-    c.fillStyle=`rgba(${28+Math.random()*45|0},${73+Math.random()*75|0},${31+Math.random()*40|0},${.30+Math.random()*.45})`;
-    c.beginPath(); c.arc(x,y,rr,0,Math.PI*2); c.fill();
-  }
-  /* Pequeñas rosetas de primer plano */
-  for(let i=0;i<48;i++){
-    const x=W*(.02+Math.random()*.96), y=H*(.86+Math.random()*.10), r=(2+Math.random()*5)*dpr;
-    for(let k=0;k<5;k++){
-      const a=k*Math.PI*2/5+Math.random()*.18;
-      leaf(x+Math.cos(a)*r*.55,y+Math.sin(a)*r*.35,r*.8,r*.32,a, 'rgba(70,130,54,', .38+Math.random()*.25);
-    }
   }
 
   /* glass edge / waterline */
@@ -683,7 +565,7 @@ class Artemia{
     this.y -= 0.06*dpr*60*dt*0.55;
 
     const topY = H*SWIM_BAND.topFrac + 15*dpr;
-    const botY = H*WATER_FLOOR_FRAC - 12*dpr;
+    const botY = H*SWIM_BAND.botFrac - 15*dpr;
     if(this.x<20*dpr){this.x=20*dpr; this.angle=Math.PI-this.angle;}
     if(this.x>W-20*dpr){this.x=W-20*dpr; this.angle=Math.PI-this.angle;}
     if(this.y<topY){ this.y=topY; this.angle=-this.angle; }
@@ -716,7 +598,7 @@ let artemia=[];
 let artemiaSpawnT=0;
 function spawnArtemia(){
   const topY = H*SWIM_BAND.topFrac + 20*dpr;
-  const botY = H*WATER_FLOOR_FRAC - 12*dpr;
+  const botY = H*SWIM_BAND.botFrac - 20*dpr;
   let x,y;
   const s=Math.random();
   if(s<0.4){ x=Math.random()*W; y=botY - Math.random()*60*dpr; }
@@ -875,7 +757,6 @@ function drawFoodHint(t, dt, mouse){
 /* ============================================================
    BETTA — IDÉNTICO a tu archivo original
    ============================================================ */
-/* PALETTES CONSERVADAS DEL BACKUP: no modificar coloración del pez al cambiar la escena. */
 const PALETTES = {
   male:{
     body:['#07110d','#173326','#214c39','#1f5362','#173a45','#081b20'],
@@ -933,7 +814,7 @@ class Betta{
     this.ventralL=new RayFin(4,22,58*dpr*maleFinMul*finScale,.18);
     this.ventralR=new RayFin(4,22,56*dpr*maleFinMul*finScale,.18);
 
-    const yMin=H*SWIM_BAND.topFrac+45*dpr, yMax=H*WATER_FLOOR_FRAC-this.bodyLen*.45;
+    const yMin=H*SWIM_BAND.topFrac+60*dpr, yMax=H*SWIM_BAND.botFrac-60*dpr;
     this.x=opts.x!==undefined?opts.x:W*.5;
     this.y=opts.y!==undefined?opts.y:(yMin+yMax)*.5;
     this.vx=0;this.vy=0;this.angle=Math.random()*Math.PI*2;this.time=0;
@@ -941,9 +822,8 @@ class Betta{
 
     /* 1 cercano, 2 medio, 3 profundo. */
     this.depthPlane=opts.depthPlane||2;
-    this.depthZ=this.depthPlane;
     this.depthTarget=this.depthPlane;
-    this.depthVel=0;
+    this.depthT=0;
 
     this.state='cruise';this.stateT=0;this.target={x:W*.7,y:(yMin+yMax)*.5};this.lastBubble=0;this.pickTarget();
     this.sStartT=0;this.sStartDur=.35;this.sStartDir=1;
@@ -953,34 +833,22 @@ class Betta{
     this.micLevel=0;this.micPrev=0;this.micDeriv=0;
   }
 
-  getDepthScale(){
-    /* 1 = primer plano, 5 = fondo. Continuo, sin saltos. */
-    const z=this.depthZ;
-    return 1.12-(z-1)*.135;
-  }
-  setDepthPlane(p){
-    this.depthTarget=Math.max(DEPTH_MIN,Math.min(DEPTH_MAX,p));
-  }
+  getDepthScale(){ return this.depthPlane===1?1.10:(this.depthPlane===3?.78:.94); }
+  setDepthPlane(p){this.depthTarget=Math.max(1,Math.min(3,p));}
   updateDepth(dt){
-    const diff=this.depthTarget-this.depthZ;
-    if(Math.abs(diff)<.002){ this.depthZ=this.depthTarget; return; }
-    /* transición espacial lenta y amortiguada */
-    this.depthVel += diff*dt*1.7;
-    this.depthVel *= Math.pow(.72,dt*60);
-    this.depthZ += this.depthVel*dt*2.2;
-    this.depthZ=Math.max(DEPTH_MIN,Math.min(DEPTH_MAX,this.depthZ));
-    this.depthPlane=Math.round(this.depthZ);
+    if(this.depthPlane!==this.depthTarget){
+      this.depthT=Math.min(1,this.depthT+dt*.18);
+      if(this.depthT>=1){this.depthPlane=this.depthTarget;this.depthT=0;}
+    }
   }
   pickTarget(){
     const yMin=H*SWIM_BAND.topFrac+this.bodyLen*.6+30*dpr;
-    const yMax=H*WATER_FLOOR_FRAC-this.bodyLen*.48-8*dpr;
+    const yMax=H*SWIM_BAND.botFrac-this.bodyLen*.6-20*dpr;
     let tries=0,tx,ty;
     do{tx=W*(.10+Math.random()*.80);ty=yMin+Math.random()*(yMax-yMin);tries++;}while(Math.hypot(tx-this.x,ty-this.y)<260*dpr&&tries<25);
     this.target.x=tx;this.target.y=ty;
-    /* Los cinco planos son profundidad espacial continua.
-       El objetivo vertical sigue siendo el mismo cuerpo de agua;
-       no hay teletransporte ni cambio de escala por salto. */
-    if(Math.random()<.30) this.setDepthPlane(1+Math.floor(Math.random()*5));
+    /* peces fluyen autónomamente entre los planos 1–3 */
+    if(Math.random()<.18) this.setDepthPlane(1+Math.floor(Math.random()*3));
   }
   startSStart(dir){this.state='burst';this.stateT=0;this.sStartT=0;this.sStartDir=dir||(Math.random()<.5?1:-1);this.pickTarget();}
   startNesting(){
@@ -996,16 +864,16 @@ class Betta{
     const mLvl=this.micLevel,mDer=this.micDeriv;
 
     /* el micrófono estimula la física; no anima directamente los velos */
-    if(micActive && mDer>.018 && this.state!=='nesting' && this.state!=='burst') {
-      this.vx += Math.cos(this.angle)*(mDer*.032 + (this.micBass||0)*.008 + (this.micMid||0)*.0025);
-      this.vy += Math.sin(this.angle)*(mDer*.032 + (this.micBass||0)*.008 + (this.micMid||0)*.0025);
-      if(mDer>.085) this.startSStart();
+    if(micActive && mDer>.055 && this.state!=='nesting' && this.state!=='burst') {
+      this.vx += Math.cos(this.angle)*(mDer*.018 + (this.micBass||0)*.004);
+      this.vy += Math.sin(this.angle)*(mDer*.018 + (this.micBass||0)*.004);
+      if(mDer>.30) this.startSStart();
     }
 
     if(micActive&&this.state!=='nesting'&&this.state!=='burst'){
       if(mDer>.30){}
-      else if(mLvl>.045&&mLvl<.30&&this.state!=='display'&&this.isAdult){this.state='display';this.stateT=0;this.target.x=this.x+Math.cos(this.angle+Math.PI/2)*100*dpr;this.target.y=this.y+Math.sin(this.angle+Math.PI/2)*100*dpr;}
-      else if(mLvl<.014&&this.state==='display'&&this.stateT>1.8){this.state='cruise';this.stateT=0;this.pickTarget();}
+      else if(mLvl>.09&&mLvl<.28&&this.state!=='display'&&this.isAdult){this.state='display';this.stateT=0;this.target.x=this.x+Math.cos(this.angle+Math.PI/2)*100*dpr;this.target.y=this.y+Math.sin(this.angle+Math.PI/2)*100*dpr;}
+      else if(mLvl<.022&&this.state==='display'&&this.stateT>1.8){this.state='cruise';this.stateT=0;this.pickTarget();}
     }
 
     let nearestA=null,nA=1e9;
@@ -1079,7 +947,7 @@ class Betta{
     const speed=Math.hypot(this.vx,this.vy),drag=.020+speed*.020;this.vx*=1-drag;this.vy*=1-drag;const MAXV=this.isAdult?1.8:1.2;if(speed>MAXV){this.vx*=MAXV/speed;this.vy*=MAXV/speed;}
     this.x+=this.vx*dpr*60*dt;this.y+=this.vy*dpr*60*dt;
 
-    const M=this.bodyLen*1.2+40*dpr,topY=H*SWIM_BAND.topFrac+this.bodyLen*.4,botY=H*WATER_FLOOR_FRAC-this.bodyLen*.4;let bounced=false;
+    const M=this.bodyLen*1.2+40*dpr,topY=H*SWIM_BAND.topFrac+this.bodyLen*.4,botY=H*SWIM_BAND.botFrac-this.bodyLen*.4;let bounced=false;
     if(this.x<M){this.vx=Math.abs(this.vx)*.5;this.x=M;bounced=true;}if(this.x>W-M){this.vx=-Math.abs(this.vx)*.5;this.x=W-M;bounced=true;}if(this.y<topY){this.vy=Math.abs(this.vy)*.5;this.y=topY;bounced=true;}if(this.y>botY){this.vy=-Math.abs(this.vy)*.5;this.y=botY;bounced=true;}if(bounced&&this.state!=='burst'&&this.state!=='nesting')this.pickTarget();
 
     const wv={freq:this.cur.waveFreq,amp:this.cur.waveAmp,wavelength:this.cur.wavelength};let curvFn=null;
@@ -1104,11 +972,9 @@ class Betta{
 
   draw(){
     const pal=this.pal,op=this.opacity,depth=this.getDepthScale();
-    const z=this.depthZ;
-    /* Lejanía espacial: reduce escala y contraste, no 'vida'. */
-    const farFade=.97 + .03*(1-(z-1)/4);
-    ctx.save();
-    ctx.globalAlpha=op*farFade;
+    ctx.save();ctx.globalAlpha=op;
+    if(this.depthPlane===3)ctx.globalAlpha*=.68;
+    if(this.depthPlane===1)ctx.globalAlpha*=1.05;
     ctx.translate(this.x,this.y);ctx.scale(depth,depth);ctx.translate(-this.x,-this.y);
 
     this.ventralL.draw(pal.ventral.edge,pal.ventral.mem,.9,pal.ventral.hi);
@@ -1186,7 +1052,7 @@ class Pellet{
     this.phase=Math.random()*Math.PI*2;
     this.eaten=false;
     this.restT=0;
-    this.floorY = H*WATER_FLOOR_FRAC - 8*dpr;
+    this.floorY = H*SWIM_BAND.botFrac - 25*dpr;
   }
   update(dt){
     this.y+=this.vy*dpr*60*dt;
@@ -1231,12 +1097,11 @@ function loop(now){
 
   readMic();
 
-  /* PLANO 5: agua + vida distante / fondo */
+  /* PLANO 5: agua / fondo */
   ctx.drawImage(swampCanvas,0,0);
 
   /* PLANO 4: vegetación lejana */
   drawPlantsSet(t,plants,.62);
-  drawPlantsSet(t,plantsFg,.16);
   drawMotes(dt);
 
   /* nidos */
@@ -1259,17 +1124,17 @@ function loop(now){
   const fishes=allBettas();
   for(const f of fishes)f.update(dt);
 
-  /* ========================================================
-     PECES — 5 planos espaciales continuos
-     Se ordenan por profundidad real, no por saltos discretos.
-     Así el cambio de tamaño es progresivo y el pez puede
-     atravesar 1 → 2 → 3 → 4 → 5 sin parecer un bug.
-     ======================================================== */
-  fishes.sort((a,b)=>b.depthZ-a.depthZ);
-  for(const f of fishes)f.draw();
+  /* PLANO 3 — peces profundos */
+  for(const f of fishes)if(f.depthPlane===3)f.draw();
 
-  /* una segunda masa vegetal separa ópticamente los estratos */
-  drawPlantsSet(t,plants,.30);
+  /* vegetación media sobre parte del espacio */
+  drawPlantsSet(t,plants,.42);
+
+  /* PLANO 2 — peces medios */
+  for(const f of fishes)if(f.depthPlane===2)f.draw();
+
+  /* PLANO 1 — peces cercanos */
+  for(const f of fishes)if(f.depthPlane===1)f.draw();
 
   /* vegetación frontal, como la fotografía */
   drawPlantsSet(t,plantsFg,1);
