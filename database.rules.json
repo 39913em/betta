@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "biomas": {
+      ".read": true,
+      ".indexOn": ["t"],
+      "$id": {
+        ".write": "$id.matches(/^b[a-z0-9]{6,16}$/)",
+        ".validate": "newData.hasChildren(['t','f','n','x'])",
+        "t": { ".validate": "newData.isNumber()" },
+        "f": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 10000" },
+        "n": { ".validate": "newData.isNumber() && newData.val() >= 0" },
+        "x": { ".validate": "newData.val() === 0 || newData.val() === 1" },
+        "$other": { ".validate": false }
+      }
+    }
+  }
+}

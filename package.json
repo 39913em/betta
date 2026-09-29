@@ -1,0 +1,8 @@
+{
+  "name": "betta-diorama",
+  "version": "1.1.0",
+  "description": "BETTA — Diorama Vivo: data art con sedimento persistente",
+  "private": true,
+  "scripts": { "start": "npx --yes http-server . -p 8080 -c-1" },
+  "license": "MIT"
+}
