@@ -13,14 +13,15 @@ function start(){
 }
 
 start();
-/* Red: toma o recupera un espacio y sustituye el estado local por el del espacio */
-Net.init().then(r=>{
-  if(r.role!=='owner') return;
+/* El estado del espacio en la nube manda sobre el local */
+function becomeOwner(state){
   const before=Persist.state().sex;
-  Persist.adopt(r.state);
+  Persist.adopt(state);
   if(Persist.state().sex!==before) betta=new Betta(Persist.state().sex,{variant:'original',isFounder:true,isAdult:true,depthPlane:2});
   Net.publish(true);
-});
+}
+/* Red + introducción: se observa primero; la cuenta solo se pide al tomar un lugar */
+Net.init().then(r=>{ if(r.role==='owner') becomeOwner(r.state); Onboarding.start(r); });
 /* PERF: buildSwamp es caro; solo se reconstruye cuando el resize se detiene */
 let resizeTimer;
 addEventListener('resize',()=>{

@@ -1,6 +1,6 @@
 /* ============================================================
    RED · 10 ESPACIOS ABIERTOS + AGUA COMÚN
-   - Firebase Auth anónima da identidad a cada navegador.
+   - Se mira sin cuenta; al tomar un lugar se pide cuenta de Google.
    - Hay 10 espacios (s1..s10). Quien llega toma el primero libre
      mediante una transacción atómica: nadie pisa a nadie.
    - El estado del bioma (pez, sedimento) vive en el espacio, no
@@ -21,35 +21,56 @@ const Net = (()=>{
   const isFree=s=>!s || !s.owner || abandoned(s);
   const timeout=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 
-  /* ---------- arranque ---------- */
+  /* ---------- arranque: se observa SIN pedir cuenta ---------- */
   async function init(){
     if(!FIREBASE_CONFIG || typeof firebase==='undefined' || !firebase.auth) return {role:'local'};
     try{ return await timeout(boot(),7000); }
-    catch(e){ error=String(e&&e.message||e); role='local'; online=false; return {role:'local'}; }
+    catch(e){ error=humanize(e); console.warn('[Betta] Red no disponible, modo local:',e); role='local'; online=false; return {role:'local'}; }
   }
   async function boot(){
     firebase.initializeApp(FIREBASE_CONFIG);
-    const cred=await firebase.auth().signInAnonymously();
-    uid=cred.user.uid;
     slotsRef=firebase.database().ref('slots');
     slots=(await slotsRef.once('value')).val()||{};
     online=true;
-    for(let i=1;i<=N;i++) if(slots[sid(i)] && slots[sid(i)].owner===uid) mySlot=i;
-    if(!mySlot && now()>+(localStorage.getItem(NOCLAIM_KEY)||0)){
-      for(let i=1;i<=N && !mySlot;i++){
-        if(!isFree(slots[sid(i)])) continue;
-        if(await claim(i)) mySlot=i;
-      }
-    }
-    role=mySlot?'owner':'spectator';
     slotsRef.on('value',s=>{
       slots=s.val()||{}; recompute();
       if(mySlot && (!slots[sid(mySlot)] || slots[sid(mySlot)].owner!==uid)){ mySlot=null; role='spectator'; }
     },()=>{ online=false; });
-    if(mySlot){ setInterval(()=>{ if(!document.hidden) publish(true); },BEAT_MS); }
+    /* con sesión previa se recupera el espacio; sin sesión no se pide nada */
+    const user=await new Promise(res=>{ const off=firebase.auth().onAuthStateChanged(u=>{ off(); res(u); }); });
+    if(user){ uid=user.uid; for(let i=1;i<=N;i++) if(slots[sid(i)] && slots[sid(i)].owner===uid) mySlot=i; }
+    role=mySlot?'owner':'spectator';
+    if(mySlot) startBeat();
     recompute();
     return { role, slot:mySlot, state: mySlot?slots[sid(mySlot)]:null };
   }
+  /* se llama SOLO tras aceptar la responsiva: pide cuenta de Google y toma un lugar */
+  async function takeSlot(){
+    if(!online) return {ok:false,reason:'Sin conexión con la red del bioma.'};
+    if(now()<+(localStorage.getItem(NOCLAIM_KEY)||0)) return {ok:false,reason:'Cediste un lugar hace poco. Podrás tomar otro pasadas 24 horas.'};
+    try{
+      if(!uid){ const c=await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()); uid=c.user.uid; }
+      slots=(await slotsRef.once('value')).val()||{};
+      for(let i=1;i<=N && !mySlot;i++) if(slots[sid(i)] && slots[sid(i)].owner===uid) mySlot=i;
+      for(let i=1;i<=N && !mySlot;i++) if(isFree(slots[sid(i)]) && await claim(i)) mySlot=i;
+      if(!mySlot) return {ok:false,reason:'Los 10 lugares se ocuparon mientras decidías.'};
+      role='owner'; startBeat(); recompute();
+      return {ok:true, slot:mySlot, state:slots[sid(mySlot)]||null};
+    }catch(e){ return {ok:false,reason:humanize(e)}; }
+  }
+  function humanize(e){
+    const c=(e&&e.code)||'';
+    return ({ 'auth/popup-closed-by-user':'Cerraste la ventana de Google. Puedes intentarlo de nuevo.',
+      'auth/cancelled-popup-request':'Se canceló el inicio de sesión. Inténtalo de nuevo.',
+      'auth/popup-blocked':'Tu navegador bloqueó la ventana de Google. Permítela e inténtalo de nuevo.',
+      'auth/unauthorized-domain':'Este dominio no está autorizado en Firebase (Authentication > Configuración > Dominios autorizados).',
+      'auth/operation-not-allowed':'Falta habilitar el proveedor Google en Firebase (Authentication > Método de acceso).'
+    })[c] || ('No se pudo completar: '+(c||(e&&e.message)||e));
+  }
+  let beat=null;
+  function startBeat(){ if(!beat) beat=setInterval(()=>{ if(!document.hidden) publish(true); },BEAT_MS); }
+  const freeCount=()=>{ let c=0; for(let i=1;i<=N;i++) if(isFree(slots[sid(i)])) c++; return c; };
+
   /* transacción: toma el espacio solo si sigue libre */
   async function claim(i){
     try{
@@ -58,7 +79,8 @@ const Net = (()=>{
         const base=cur||{ x:Math.random()<.5?0:1, n:0, f:0, d:[] };
         return Object.assign({},base,{ owner:uid, t:now() });
       });
-      return r.committed && r.snapshot.val().owner===uid;
+      if(r.committed && r.snapshot.val().owner===uid){ slots[sid(i)]=r.snapshot.val(); return true; }
+      return false;
     }catch(e){ return false; }
   }
 
@@ -107,6 +129,6 @@ const Net = (()=>{
     L.forEach((l,i)=>ctx.fillText(l,12*dpr,(20+i*16)*dpr)); ctx.restore();
   }
 
-  return { init, publish, cede, drawWater,
+  return { init, takeSlot, freeCount, online:()=>online, publish, cede, drawWater,
     canFeed:()=>role!=='spectator', isOwner:()=>role==='owner', role:()=>role };
 })();

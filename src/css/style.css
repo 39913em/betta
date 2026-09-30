@@ -1,2 +1,17 @@
 html,body{margin:0;padding:0;background:#020503;width:100%;height:100%;overflow:hidden;cursor:crosshair;touch-action:none;overscroll-behavior:none;-webkit-user-select:none;user-select:none}
 canvas{display:block;width:100vw;height:100vh}
+#ob{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;background:rgba(2,5,3,.72);backdrop-filter:blur(3px);font-family:Georgia,'Times New Roman',serif;color:#d6e2d8;z-index:10;overflow:auto}
+#ob .card{max-width:480px;width:100%;background:rgba(10,18,13,.92);border:1px solid rgba(160,190,165,.22);border-radius:14px;padding:24px 26px;box-shadow:0 10px 40px rgba(0,0,0,.6);cursor:default}
+#ob h1{font-size:20px;font-weight:normal;letter-spacing:2px;margin:0 0 14px;color:#e8d9b0}
+#ob p,#ob li,#ob label{font-size:15px;line-height:1.55;margin:0 0 10px}
+#ob ul{padding-left:18px;margin:0 0 12px}
+#ob label{display:flex;gap:8px;align-items:flex-start}
+#ob a{color:#e8d9b0}
+#ob .btns{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+#ob button,#care{font:inherit;font-size:14px;padding:10px 16px;border-radius:8px;border:1px solid #c9a75a;background:#c9a75a;color:#1a1408;cursor:pointer}
+#ob button.ghost{background:transparent;color:#d6e2d8;border-color:rgba(160,190,165,.4)}
+#ob button:disabled{opacity:.4;cursor:not-allowed}
+#ob .err{color:#f0a08a}
+#care{position:fixed;right:14px;bottom:34px;display:none;z-index:5;font-family:Georgia,serif;opacity:.85}
+#foot{position:fixed;right:14px;bottom:10px;font:11px Georgia,serif;letter-spacing:1px;z-index:5;opacity:.45}
+#foot a{color:#c2d4c6;text-decoration:none}#foot a:hover{text-decoration:underline}

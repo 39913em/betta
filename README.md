@@ -36,6 +36,7 @@ src/js/
   betta.js      pez: paletas, variantes, comportamiento
   pellet.js     crías y pellets
   main.js       instancias y bucle principal
+  onboarding.js introducción, tutorial, decisión y responsiva
   input.js      ratón y táctil
 ```
 
@@ -59,22 +60,32 @@ dividido en módulos. `pez.html` y `Betta_diorama.html` del repositorio original
 - [x] Fase 2: red de hasta 10 biomas (Firebase Realtime Database) con agua común calculada. Ver «Firebase».
 - [ ] Fase 3: vista de galería, herencia/adopción y rescate colectivo.
 
-## Firebase: 10 espacios abiertos (Fase 2)
+## Flujo del visitante
 
-Configuración (una sola vez, en la consola de Firebase del proyecto `bettea-d4b04`):
-1. **Authentication → Método de acceso → Anónimo → Habilitar.** (Obligatorio: da identidad a cada navegador.)
-2. **Realtime Database → Crear base de datos.**
-3. **Reglas:** pega `database.rules.json` y publica.
+1. **Entra y ve el bioma vivo** (sin cuenta, sin datos). Una introducción breve lo explica: *Acerca de* → *Cómo funciona*.
+2. **Decide:** *Solo mirar* o *Cuidar un lugar* (muestra cuántos de los 10 quedan libres).
+3. **Solo si cuida:** lee y acepta la **responsiva** (términos, aviso de privacidad y compromiso) → inicia sesión con **Google** → recibe su lugar.
+4. Quien volvió a mirar ve un botón discreto «Cuidar un lugar»; el pie de página enlaza *Acerca de*, *Términos* y *Privacidad*.
 
-Cómo funciona:
-- Hay 10 espacios (`s1`…`s10`). Quien llega **toma el primero libre** (transacción atómica). Si están todos ocupados, entra como **espectador** (mira, no alimenta).
-- El estado del bioma (sexo del pez, sedimento, comidas) vive en el espacio, no en el navegador.
-- **Ceder:** mantener pulsado 3 s sobre el sedimento (franja inferior). El espacio queda libre con su pez y su sedimento; quien lo adopte los hereda. Quien cede no retoma espacio durante 24 h.
-- **Rescate:** un espacio sin actividad 7 días queda en rescate y cualquiera puede tomarlo (lo hacen las reglas, no el cliente).
-- **Agua común:** calculada por cada cliente con la comida de las últimas 24 h de los espacios; nunca se guarda.
-- Añade `?debug` a la URL para ver rol, espacio, estado de la red y agua.
+## Firebase: 10 espacios abiertos
 
-Límites: si alguien borra los datos del navegador pierde su identidad y su espacio; se libera solo tras 7 días.
+Configuración (una sola vez, proyecto `bettea-d4b04`):
+1. **Authentication → Comenzar → Método de acceso → Google → Habilitar** (pide un correo de soporte).
+2. **Authentication → Configuración → Dominios autorizados → Agregar** `39913em.github.io` (y tu dominio propio si lo usas).
+3. **Realtime Database → Crear base de datos** y pegar `database.rules.json` en **Reglas**.
+
+(Ya no se usa acceso anónimo: no hace falta habilitarlo ni activar la limpieza automática.)
+
+- Hay 10 espacios (`s1`…`s10`). Se toma el primero libre con una transacción atómica. Con todos ocupados, se entra como espectador.
+- El estado del bioma (sexo del pez, sedimento, comidas) vive en el espacio, ligado a la cuenta, no al navegador: se recupera en cualquier dispositivo.
+- **Ceder:** mantener pulsado 3 s sobre el sedimento. Queda libre con su pez y su sedimento (herencia). Quien cede no retoma lugar durante 24 h.
+- **Rescate:** 7 días sin actividad y cualquiera puede tomarlo (lo imponen las reglas).
+- **Agua común:** calculada en cada cliente con la comida de las últimas 24 h; nunca se guarda.
+- `?debug` en la URL muestra rol, espacio, red y agua.
+
+## Legal
+
+`legal/terminos.html` y `legal/privacidad.html` son **borradores** (redactados con la LFPDPPP en mente). Completa los datos entre [corchetes] y que los revise un abogado antes de publicar.
 
 ## Despliegue en GitHub Pages
 
