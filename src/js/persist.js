@@ -18,18 +18,28 @@ const Persist = (()=>{
     if(s.lastDay!==d){ s.days.push({d,f:0}); s.lastDay=d; if(s.days.length>MAX_LAYERS) s.days.shift(); save(); }
   }
   function save(){ try{ localStorage.setItem(KEY,JSON.stringify(s)); }catch(e){} }
-  function onFeed(){ const l=s.days[s.days.length-1]; if(l) l.f++; s.feeds++; layer=null; save(); if(typeof Net!=='undefined') Net.publish(); }
+  /* el espacio en la nube manda: hidrata el estado local con el del espacio */
+  function adopt(rec){
+    if(!rec) return;
+    s.sex=rec.x===1?'female':'male'; s.days=(rec.d||[]).filter(Boolean); s.feeds=rec.n|0;
+    if(!s.first) s.first=Date.now();
+    const d=today();
+    if(s.lastDay!==d||!s.days.length||s.days[s.days.length-1].d!==d){ s.days.push({d,f:0}); if(s.days.length>MAX_LAYERS) s.days.shift(); }
+    s.lastDay=d; layer=null; save();
+  }
+  function onFeed(){ const l=s.days[s.days.length-1]; if(l) l.f++; s.feeds++; layer=null; save(); Net.publish(); }
   function sex(){ if(!s.sex){ s.sex=Math.random()<.5?'male':'female'; save(); } return s.sex; }
   function build(){
     layer=document.createElement('canvas'); layer.width=W; layer.height=H;
     const c=layer.getContext('2d'), y0=H*WATER_FLOOR_FRAC, hh=H-y0;
-    const n=s.days.length, step=hh/Math.max(n,12);
+    const n=s.days.length, step=Math.max(hh/Math.max(n,12),5*dpr);
     s.days.forEach((l,i)=>{
       const k=Math.min(1,l.f/12), y=H-(i+1)*step;
-      c.fillStyle=`rgba(${Math.round(40+k*70)},${Math.round(30+k*35)},${Math.round(18+k*8)},${0.10+k*0.16})`;
+      c.fillStyle=`rgba(${Math.round(40+k*70)},${Math.round(30+k*35)},${Math.round(18+k*8)},${0.20+k*0.30})`;
       c.fillRect(0,y,W,step+1);
+      c.fillStyle='rgba(200,170,110,.10)'; c.fillRect(0,y,W,dpr);
     });
   }
   function draw(){ if(!layer) build(); ctx.drawImage(layer,0,0); }
-  return { state:()=>s, load, save, onFeed, sex, draw, invalidate(){ layer=null; } };
+  return { state:()=>s, adopt, load, save, onFeed, sex, draw, invalidate(){ layer=null; } };
 })();

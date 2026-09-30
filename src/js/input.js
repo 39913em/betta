@@ -6,6 +6,7 @@ function canvasPos(cx,cy){
   return {x:(cx-r.left)*dpr, y:(cy-r.top)*dpr};
 }
 function dropPellet(){
+  if(!Net.canFeed()) return;
   pellets.push(new Pellet(foodCircle.x, foodCircle.y - 4*dpr));
   Persist.onFeed();
   for(let i=0;i<3;i++) setTimeout(()=>bubbleSnd(0.7,1.0+Math.random()*0.4),i*60);
@@ -28,3 +29,19 @@ canvas.addEventListener('touchstart', e=>{
     lastTapT=0;
   } else { lastTapT=nowT; lastTapX=p.x; lastTapY=p.y; }
 }, {passive:true});
+
+/* Ceder el espacio: mantener pulsado 3 s sobre el sedimento (franja inferior) */
+let holdT=null;
+function holdStart(p){
+  if(!Net.isOwner() || p.y < H*WATER_FLOOR_FRAC) return;
+  holdT=setTimeout(async()=>{
+    holdT=null;
+    if(confirm('¿Ceder tu espacio del bioma?\n\nTu pez y su sedimento se quedan para quien lo adopte. Tú pasas a mirar.')){
+      if(await Net.cede()) location.reload();
+    }
+  },3000);
+}
+function holdCancel(){ clearTimeout(holdT); holdT=null; }
+canvas.addEventListener('mousedown', e=>holdStart(canvasPos(e.clientX,e.clientY)));
+canvas.addEventListener('touchstart', e=>holdStart(canvasPos(e.touches[0].clientX,e.touches[0].clientY)), {passive:true});
+['mouseup','mouseleave','touchend','touchcancel','touchmove'].forEach(ev=>canvas.addEventListener(ev,holdCancel,{passive:true}));

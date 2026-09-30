@@ -6,7 +6,6 @@ let mouse=null;
 
 function start(){
   Persist.load();
-  Net.init();
   resize();
   initFoodHint();
   const sex=Persist.sex();
@@ -14,6 +13,14 @@ function start(){
 }
 
 start();
+/* Red: toma o recupera un espacio y sustituye el estado local por el del espacio */
+Net.init().then(r=>{
+  if(r.role!=='owner') return;
+  const before=Persist.state().sex;
+  Persist.adopt(r.state);
+  if(Persist.state().sex!==before) betta=new Betta(Persist.state().sex,{variant:'original',isFounder:true,isAdult:true,depthPlane:2});
+  Net.publish(true);
+});
 /* PERF: buildSwamp es caro; solo se reconstruye cuando el resize se detiene */
 let resizeTimer;
 addEventListener('resize',()=>{

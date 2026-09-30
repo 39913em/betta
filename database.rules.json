@@ -1,15 +1,16 @@
 {
   "rules": {
-    "biomas": {
+    "slots": {
       ".read": true,
-      ".indexOn": ["t"],
-      "$id": {
-        ".write": "$id.matches(/^b[a-z0-9]{6,16}$/)",
-        ".validate": "newData.hasChildren(['t','f','n','x'])",
-        "t": { ".validate": "newData.isNumber()" },
+      "$sid": {
+        ".write": "auth != null && $sid.matches(/^s([1-9]|10)$/) && (data.child('owner').val() === auth.uid || (newData.child('owner').val() === auth.uid && (!data.child('owner').exists() || data.child('t').val() < now - 604800000)))",
+        ".validate": "newData.hasChildren(['t','x'])",
+        "owner": { ".validate": "newData.isString()" },
+        "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
         "f": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 10000" },
         "n": { ".validate": "newData.isNumber() && newData.val() >= 0" },
         "x": { ".validate": "newData.val() === 0 || newData.val() === 1" },
+        "d": { ".validate": true },
         "$other": { ".validate": false }
       }
     }

@@ -59,18 +59,22 @@ dividido en módulos. `pez.html` y `Betta_diorama.html` del repositorio original
 - [x] Fase 2: red de hasta 10 biomas (Firebase Realtime Database) con agua común calculada. Ver «Firebase».
 - [ ] Fase 3: vista de galería, herencia/adopción y rescate colectivo.
 
-## Firebase (Fase 2)
+## Firebase: 10 espacios abiertos (Fase 2)
 
-1. El proyecto `bettea-d4b04` ya está configurado en `src/js/config.js` (usa el SDK compat por CDN, no npm).
-2. En la consola: **Realtime Database → Crear base de datos** si aún no existe.
-3. Publica las reglas de `database.rules.json` (`firebase deploy --only database` o pégalas en la consola).
+Configuración (una sola vez, en la consola de Firebase del proyecto `bettea-d4b04`):
+1. **Authentication → Método de acceso → Anónimo → Habilitar.** (Obligatorio: da identidad a cada navegador.)
+2. **Realtime Database → Crear base de datos.**
+3. **Reglas:** pega `database.rules.json` y publica.
 
-Cada bioma escribe solo un registro pequeño (`t`, `f` comidas de hoy, `n` total, `x` sexo). El **agua común no se guarda**:
-cada cliente la calcula con los registros de las últimas 24 h; más alimento en la red => agua más ámbar.
-Sin configuración, todo funciona en modo local.
+Cómo funciona:
+- Hay 10 espacios (`s1`…`s10`). Quien llega **toma el primero libre** (transacción atómica). Si están todos ocupados, entra como **espectador** (mira, no alimenta).
+- El estado del bioma (sexo del pez, sedimento, comidas) vive en el espacio, no en el navegador.
+- **Ceder:** mantener pulsado 3 s sobre el sedimento (franja inferior). El espacio queda libre con su pez y su sedimento; quien lo adopte los hereda. Quien cede no retoma espacio durante 24 h.
+- **Rescate:** un espacio sin actividad 7 días queda en rescate y cualquiera puede tomarlo (lo hacen las reglas, no el cliente).
+- **Agua común:** calculada por cada cliente con la comida de las últimas 24 h de los espacios; nunca se guarda.
+- Añade `?debug` a la URL para ver rol, espacio, estado de la red y agua.
 
-> Nota: sin autenticación, cualquiera con la URL puede escribir registros válidos. Para una exposición larga, añade
-> Firebase Auth anónima y restringe la escritura a `auth.uid === $id`.
+Límites: si alguien borra los datos del navegador pierde su identidad y su espacio; se libera solo tras 7 días.
 
 ## Despliegue en GitHub Pages
 
