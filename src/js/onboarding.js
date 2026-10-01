@@ -38,6 +38,15 @@ const Onboarding=(()=>{
        <label><input type="checkbox"> He leído el <a href="legal/privacidad.html" target="_blank">Aviso de privacidad</a>.</label>
        <label><input type="checkbox"> Asumo el compromiso de cuidar mi lugar o cederlo.</label>${msg?`<p class="err">${msg}</p>`:''}`,
       btn('decide','Atrás','ghost')+`<button data-a="accept" disabled>Aceptar y continuar con Google</button>`),
+    gallery:()=>{
+      const cell=s=>`<div class="cell ${s.st.replace(' ','-')}"><div class="h"><b>${s.i}</b> ${s.sex}</div><div class="st">${s.st}${s.st==='libre'&&s.history?' · con historia':''}</div>
+        <div class="bars">${s.d.map(x=>`<i style="height:${Math.min(26,3+(x.f|0)*2)}px"></i>`).join('')}</div></div>`;
+      const info=Net.online()?Net.slotsInfo():[], can=Net.online()&&!Net.isOwner()&&Net.freeCount()>0;
+      return card('Los 10 lugares',
+        Net.online()?`<div class="grid">${info.map(cell).join('')}</div>
+         <p class="small">Cada barra es un día de sedimento. Un lugar en riesgo lleva más de 3 días sin visitas; <b>en rescate</b> (más de 7) puede ser adoptado por cualquiera.</p>`
+        :'<p>La red del bioma no está disponible ahora.</p>',
+        btn('watch','Cerrar','ghost')+(can?btn('pledge','Cuidar un lugar'):'')); },
     working:()=>card('Un momento…',`<p>${msg}</p>`,''),
     done:()=>card(`Tu lugar es el ${last.slot}`,
       `<p>Tu pez ya es tuyo. Aliméntalo con doble clic sobre el círculo de comida y vuelve a visitarlo.</p>
@@ -68,6 +77,8 @@ const Onboarding=(()=>{
     const b=ob.querySelector('[data-a=accept]'); if(b) b.disabled=ob.querySelectorAll('input:checked').length<3;
   });
   if(care) care.addEventListener('click',()=>show('decide'));
+  const gal=document.getElementById('lnkGal');
+  if(gal) gal.addEventListener('click',e=>{ e.preventDefault(); show('gallery'); });
   if(about) about.addEventListener('click',e=>{ e.preventDefault(); show('about'); });
   function start(r){
     if(r.role==='owner'){ ob.style.display='none'; refresh(); }

@@ -193,7 +193,7 @@ class Betta{
       const spF=Math.min(1,Math.hypot(this.vx,this.vy)*40);this.angle+=diff*this.cur.turnRate*(.5+.5*spF);this.vx+=Math.cos(this.angle)*this.cur.thrust;this.vy+=Math.sin(this.angle)*this.cur.thrust;
     }
 
-    const speed=Math.hypot(this.vx,this.vy),drag=.020+speed*.020;this.vx*=1-drag;this.vy*=1-drag;const MAXV=this.isAdult?1.8:1.2;if(speed>MAXV){this.vx*=MAXV/speed;this.vy*=MAXV/speed;}
+    const speed=Math.hypot(this.vx,this.vy),drag=.020+speed*.020;this.vx*=1-drag;this.vy*=1-drag;const MAXV=(this.isAdult?1.8:1.2)*(1-0.4*Net.waterLevel());if(speed>MAXV){this.vx*=MAXV/speed;this.vy*=MAXV/speed;}
     this.x+=this.vx*dpr*60*dt;this.y+=this.vy*dpr*60*dt;
 
     const M=this.bodyLen*1.2+40*dpr,topY=H*SWIM_BAND.topFrac+this.bodyLen*.4,botY=H*WATER_FLOOR_FRAC-this.bodyLen*.4;let bounced=false;

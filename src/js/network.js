@@ -129,6 +129,13 @@ const Net = (()=>{
     L.forEach((l,i)=>ctx.fillText(l,12*dpr,(20+i*16)*dpr)); ctx.restore();
   }
 
-  return { init, takeSlot, freeCount, online:()=>online, publish, cede, drawWater,
+  function slotsInfo(){
+    return Array.from({length:N},(_,k)=>{
+      const i=k+1, s=slots[sid(i)], age=s?(now()-s.t)/864e5:0;
+      const st=!s||!s.owner?'libre':s.owner===uid?'tuyo':age>7?'en rescate':age>3?'en riesgo':'cuidado';
+      return { i, st, sex:s?(s.x===1?'♀':'♂'):'', d:(s&&s.d||[]).filter(Boolean).slice(-30), history:!!(s&&s.n) };
+    });
+  }
+  return { init, slotsInfo, waterLevel:()=>water, takeSlot, freeCount, online:()=>online, publish, cede, drawWater,
     canFeed:()=>role!=='spectator', isOwner:()=>role==='owner', role:()=>role };
 })();
