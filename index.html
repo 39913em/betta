@@ -12,7 +12,7 @@
 <canvas id="c"></canvas>
 <div id="ob"></div>
 <button id="care">Cuidar un lugar</button>
-<nav id="foot"><a href="#" id="lnkAbout">Acerca de</a> · <a href="#" id="lnkGal">Los 10</a> · <a href="legal/terminos.html" target="_blank">Términos</a> · <a href="legal/privacidad.html" target="_blank">Privacidad</a></nav>
+<nav id="foot"><a href="#" data-open="about">Acerca de</a> · <a href="#" data-open="gallery">Los 10</a> · <a href="#" data-open="terms">Términos</a> · <a href="#" data-open="priv">Privacidad</a></nav>
 <!-- Scripts clásicos (no módulos): funcionan también abriendo el archivo con doble clic. Orden importante. -->
 <!-- Firebase (opcional, solo si config.js tiene FIREBASE_CONFIG). Si no carga, la pieza corre en modo local. -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -30,6 +30,7 @@
 <script src="src/js/foodhint.js"></script>
 <script src="src/js/betta.js"></script>
 <script src="src/js/pellet.js"></script>
+<script src="src/js/legal.js"></script>
 <script src="src/js/onboarding.js"></script>
 <script src="src/js/main.js"></script>
 <script src="src/js/input.js"></script>
