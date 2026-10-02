@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 · BETTA-BIOMA</title>
+  <meta name="theme-color" content="#020503">
+  <link rel="manifest" href="/betta/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/betta/icons/icon-192.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      min-height: 100%;
+      background: #020503;
+      color: #e8f5e9;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(192,38,211,0.18), transparent 55%),
+        radial-gradient(circle at 50% 55%, rgba(37,99,235,0.12), transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 520px;
+      width: 100%;
+      animation: fade 0.9s ease-out;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .betta-wrap {
+      width: min(320px, 78vw);
+      margin: 0 auto 8px;
+      filter: drop-shadow(0 0 24px rgba(192,38,211,0.35));
+    }
+    .betta-wrap svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      overflow: visible;
+    }
+
+    .tail {
+      transform-origin: 240px 150px;
+      animation: sway 3.4s ease-in-out infinite;
+    }
+    .dorsal {
+      transform-origin: 190px 130px;
+      animation: sway 2.8s ease-in-out infinite reverse;
+    }
+    .anal {
+      transform-origin: 200px 180px;
+      animation: sway 3.1s ease-in-out infinite;
+    }
+    .ventral {
+      transform-origin: 150px 180px;
+      animation: sway 2.4s ease-in-out infinite reverse;
+    }
+    .body-fish {
+      animation: bob 3.4s ease-in-out infinite;
+    }
+    .betta-wrap {
+      animation: swim 5s ease-in-out infinite;
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: rotate(-3deg); }
+      50%      { transform: rotate(3deg); }
+    }
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-4px); }
+    }
+    @keyframes swim {
+      0%, 100% { transform: translateX(-6px); }
+      50%      { transform: translateX(6px); }
+    }
+
+    .code {
+      font-size: clamp(3.4rem, 16vw, 6.5rem);
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      margin-top: 4px;
+      background: linear-gradient(
+        120deg,
+        #ff2d55 0%,
+        #c026d3 38%,
+        #7c3aed 68%,
+        #2563eb 100%
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h1 {
+      font-size: 1.35rem;
+      margin-top: 14px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #f1fdf5;
+    }
+
+    p {
+      margin-top: 12px;
+      color: #8fa89a;
+      font-size: 0.98rem;
+      line-height: 1.65;
+      max-width: 420px;
+      margin-inline: auto;
+    }
+
+    a.btn {
+      display: inline-block;
+      margin-top: 28px;
+      padding: 12px 28px;
+      background: linear-gradient(120deg, #c026d3 0%, #7c3aed 100%);
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+      transition: transform 0.2s ease, box-shadow 0.25s ease, filter 0.2s ease;
+      box-shadow: 0 6px 24px rgba(124,58,237,0.35);
+    }
+    a.btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+      box-shadow: 0 10px 30px rgba(192,38,211,0.45);
+    }
+    a.btn:active { transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="betta-wrap" aria-hidden="true">
+      <svg viewBox="0 0 420 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="bettaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stop-color="#ff2d55"/>
+            <stop offset="35%"  stop-color="#c026d3"/>
+            <stop offset="70%"  stop-color="#7c3aed"/>
+            <stop offset="100%" stop-color="#2563eb"/>
+          </linearGradient>
+          <linearGradient id="bettaBody" x1="0%" y1="0%" x2="100%" y2="60%">
+            <stop offset="0%"   stop-color="#7c3aed"/>
+            <stop offset="55%"  stop-color="#c026d3"/>
+            <stop offset="100%" stop-color="#ff2d55"/>
+          </linearGradient>
+          <radialGradient id="eyeGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#e8f5e9"/>
+          </radialGradient>
+        </defs>
+
+        <path class="tail" fill="url(#bettaGrad)" opacity="0.95"
+          d="M 235 150
+             C 258 96,  320 72,  372 84
+             C 352 112, 340 132, 352 150
+             C 340 168, 352 190, 372 216
+             C 320 228, 258 204, 235 150 Z"/>
+
+        <path class="dorsal" fill="url(#bettaGrad)" opacity="0.92"
+          d="M 128 126
+             C 148 66,  216 56,  252 112
+             C 212 102, 168 106, 128 126 Z"/>
+
+        <path class="anal" fill="url(#bettaGrad)" opacity="0.92"
+          d="M 128 178
+             C 148 236, 216 254, 258 186
+             C 216 200, 168 196, 128 178 Z"/>
+
+        <g class="ventral" fill="url(#bettaGrad)" opacity="0.85">
+          <path d="M 148 182 C 138 210, 132 226, 140 232 C 146 224, 152 206, 154 186 Z"/>
+          <path d="M 162 182 C 156 212, 154 228, 162 234 C 168 224, 168 206, 168 186 Z"/>
+        </g>
+
+        <g class="body-fish">
+          <path fill="url(#bettaBody)"
+            d="M 100 150
+               C 100 118, 142 112, 182 118
+               C 222 124, 244 138, 244 150
+               C 244 162, 222 176, 182 182
+               C 142 188, 100 182, 100 150 Z"/>
+
+          <ellipse cx="132" cy="158" rx="18" ry="9"
+                   fill="url(#bettaGrad)" opacity="0.75"
+                   transform="rotate(-14 132 158)"/>
+
+          <circle cx="116" cy="142" r="6.5" fill="url(#eyeGlow)"/>
+          <circle cx="114" cy="142" r="3.2" fill="#020503"/>
+          <circle cx="113" cy="140.5" r="1" fill="#ffffff" opacity="0.9"/>
+        </g>
+
+        <g fill="#7c3aed" opacity="0.55">
+          <circle cx="80" cy="90"  r="3">
+            <animate attributeName="cy" values="90;70;90" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.55;0;0.55" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="60" cy="120" r="2">
+            <animate attributeName="cy" values="120;98;120" dur="5s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.4;0;0.4" dur="5s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="95" cy="105" r="2.5">
+            <animate attributeName="cy" values="105;82;105" dur="4.6s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="0.5;0;0.5" dur="4.6s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+      </svg>
+    </div>
+
+    <div class="code">404</div>
+    <h1>Este bioma no existe</h1>
+    <p>El betta nadó demasiado lejos y no encontramos esta página.<br>
+       Puede que el enlace esté roto o que haya cambiado de lugar.</p>
+    <a href="/betta/" class="btn">← Volver al inicio</a>
+  </div>
+</body>
+</html>
