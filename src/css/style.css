@@ -24,3 +24,5 @@ canvas{display:block;width:100vw;height:100vh}
 #ob .card.legal{display:flex;flex-direction:column;max-height:86vh}
 #ob .card.legal .body{overflow:auto;padding-right:6px;margin-bottom:4px;-webkit-overflow-scrolling:touch}
 #ob .card.legal h2{font-size:15px;color:#e8d9b0;margin:16px 0 6px;font-weight:normal}
+#ob .pinbig{font:32px/1.2 ui-monospace,monospace;letter-spacing:6px;text-align:center;color:#e8d9b0;margin:6px 0 14px}
+#ob .pinf{flex-direction:column;gap:4px}#ob .pinf input{font:18px ui-monospace,monospace;letter-spacing:4px;text-transform:uppercase;padding:8px 10px;border-radius:8px;border:1px solid rgba(160,190,165,.4);background:#0a120d;color:#e8d9b0;width:140px}

@@ -34,14 +34,18 @@ canvas.addEventListener('touchstart', e=>{
 let holdT=null;
 function holdStart(p){
   if(!Net.isOwner() || p.y < H*WATER_FLOOR_FRAC) return;
-  holdT=setTimeout(async()=>{
-    holdT=null;
-    if(confirm('¿Ceder tu espacio del bioma?\n\nTu pez y su sedimento se quedan para quien lo adopte. Tú pasas a mirar.')){
-      if(await Net.cede()) location.reload();
-    }
-  },3000);
+  holdT=setTimeout(()=>{ holdT=null; Onboarding.openCede(); },3000);
 }
 function holdCancel(){ clearTimeout(holdT); holdT=null; }
 canvas.addEventListener('mousedown', e=>holdStart(canvasPos(e.clientX,e.clientY)));
 canvas.addEventListener('touchstart', e=>holdStart(canvasPos(e.touches[0].clientX,e.touches[0].clientY)), {passive:true});
 ['mouseup','mouseleave','touchend','touchcancel','touchmove'].forEach(ev=>canvas.addEventListener(ev,holdCancel,{passive:true}));
+
+/* Limpiar: arrastrar (clic sostenido o dedo) sobre residuos, malesa y moho */
+let pressed=false;
+function scrubAt(p){ if(pressed && Decay.scrub(p.x,p.y)) holdCancel(); }
+canvas.addEventListener('mousedown',()=>{ pressed=true; });
+canvas.addEventListener('mousemove',e=>scrubAt(canvasPos(e.clientX,e.clientY)));
+canvas.addEventListener('touchstart',()=>{ pressed=true; },{passive:true});
+canvas.addEventListener('touchmove',e=>scrubAt(canvasPos(e.touches[0].clientX,e.touches[0].clientY)),{passive:true});
+['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=>canvas.addEventListener(ev,()=>{ pressed=false; },{passive:true}));

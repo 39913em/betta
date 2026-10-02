@@ -36,6 +36,7 @@ src/js/
   betta.js      pez: paletas, variantes, comportamiento
   pellet.js     crías y pellets
   main.js       instancias y bucle principal
+  decay.js      deterioro visible y limpieza
   onboarding.js introducción, tutorial, decisión y responsiva
   input.js      ratón y táctil
 ```
@@ -78,7 +79,9 @@ Configuración (una sola vez, proyecto `bettea-d4b04`):
 
 - Hay 10 espacios (`s1`…`s10`). Se toma el primero libre con una transacción atómica. Con todos ocupados, se entra como espectador.
 - El estado del bioma (sexo del pez, sedimento, comidas) vive en el espacio, ligado a la cuenta, no al navegador: se recupera en cualquier dispositivo.
-- **Ceder:** mantener pulsado 3 s sobre el sedimento. Queda libre con su pez y su sedimento (herencia). Quien cede no retoma lugar durante 24 h.
+- **Ceder:** mantener pulsado 3 s sobre el fondo. Dos opciones: **dejarlo libre** (cualquiera lo adopta) o **heredar con PIN**: se genera un PIN de 6 caracteres, el lugar queda reservado 3 días para quien lo tenga; esa persona acepta términos y privacidad e ingresa el PIN (o abre el enlace `?pin=XXXXXX`). Quien cede no retoma lugar durante 24 h.
+- **Deterioro:** sin limpieza, en ~6 días aparecen residuos, malesa y moho (hasta 18 elementos), el agua verdea y el pez nada más lento. Se limpia arrastrando sobre ellos (solo cuidadores). `?dirt=0.8` fuerza un nivel para probarlo. Un lugar adoptado en rescate hereda su suciedad: adoptarlo es rescatarlo.
+- **Invitar:** «Invitar a alguien» comparte el enlace `?invita=1`, que abre directamente la decisión.
 - **Rescate:** 7 días sin actividad y cualquiera puede tomarlo (lo imponen las reglas).
 - **Agua común:** calculada en cada cliente con la comida de las últimas 24 h; nunca se guarda.
 - `?debug` en la URL muestra rol, espacio, red y agua.
@@ -123,7 +126,9 @@ Configuración (una sola vez, proyecto `bettea-d4b04`):
 
 - Hay 10 espacios (`s1`…`s10`). Se toma el primero libre con una transacción atómica. Con todos ocupados, se entra como espectador.
 - El estado del bioma (sexo del pez, sedimento, comidas) vive en el espacio, ligado a la cuenta, no al navegador: se recupera en cualquier dispositivo.
-- **Ceder:** mantener pulsado 3 s sobre el sedimento. Queda libre con su pez y su sedimento (herencia). Quien cede no retoma lugar durante 24 h.
+- **Ceder:** mantener pulsado 3 s sobre el fondo. Dos opciones: **dejarlo libre** (cualquiera lo adopta) o **heredar con PIN**: se genera un PIN de 6 caracteres, el lugar queda reservado 3 días para quien lo tenga; esa persona acepta términos y privacidad e ingresa el PIN (o abre el enlace `?pin=XXXXXX`). Quien cede no retoma lugar durante 24 h.
+- **Deterioro:** sin limpieza, en ~6 días aparecen residuos, malesa y moho (hasta 18 elementos), el agua verdea y el pez nada más lento. Se limpia arrastrando sobre ellos (solo cuidadores). `?dirt=0.8` fuerza un nivel para probarlo. Un lugar adoptado en rescate hereda su suciedad: adoptarlo es rescatarlo.
+- **Invitar:** «Invitar a alguien» comparte el enlace `?invita=1`, que abre directamente la decisión.
 - **Rescate:** 7 días sin actividad y cualquiera puede tomarlo (lo imponen las reglas).
 - **Agua común:** calculada en cada cliente con la comida de las últimas 24 h; nunca se guarda.
 - `?debug` en la URL muestra rol, espacio, red y agua.

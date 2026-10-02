@@ -7,12 +7,13 @@
    ============================================================ */
 const Persist = (()=>{
   const KEY='betta.bioma.v1', MAX_LAYERS=90;
-  let s={ v:1, id:null, sex:null, first:0, lastDay:'', days:[], feeds:0 };
+  let s={ v:1, c:0, id:null, sex:null, first:0, lastDay:'', days:[], feeds:0 };
   let layer=null;
   const today=()=>new Date().toISOString().slice(0,10);
   function load(){
     try{ const r=JSON.parse(localStorage.getItem(KEY)||'null'); if(r&&r.v===1) s=r; }catch(e){}
     if(!s.first) s.first=Date.now();
+    if(!s.c) s.c=Date.now();
     if(!s.id) s.id='b'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);
     const d=today();
     if(s.lastDay!==d){ s.days.push({d,f:0}); s.lastDay=d; if(s.days.length>MAX_LAYERS) s.days.shift(); save(); }
@@ -21,11 +22,19 @@ const Persist = (()=>{
   /* el espacio en la nube manda: hidrata el estado local con el del espacio */
   function adopt(rec){
     if(!rec) return;
-    s.sex=rec.x===1?'female':'male'; s.days=(rec.d||[]).filter(Boolean); s.feeds=rec.n|0;
+    s.c=rec.c||Date.now(); s.sex=rec.x===1?'female':'male'; s.days=(rec.d||[]).filter(Boolean); s.feeds=rec.n|0;
     if(!s.first) s.first=Date.now();
     const d=today();
     if(s.lastDay!==d||!s.days.length||s.days[s.days.length-1].d!==d){ s.days.push({d,f:0}); if(s.days.length>MAX_LAYERS) s.days.shift(); }
     s.lastDay=d; layer=null; save();
+  }
+  /* salud del bioma: 0 = limpio, 1 = abandonado ~6 días. ?dirt=0.8 fuerza un valor para probar */
+  const DECAY_MS=6*864e5, dm=(typeof location!=='undefined'&&location.search.match(/[?&]dirt=([\d.]+)/));
+  let dbg=dm?Math.min(1,+dm[1]):null;
+  const dirt=()=>dbg!==null?dbg:Math.max(0,Math.min(1,(Date.now()-s.c)/DECAY_MS));
+  function reduceDirt(d){
+    if(dbg!==null){ dbg=Math.max(0,dbg-d); return; }
+    s.c=Date.now()-Math.max(0,dirt()-d)*DECAY_MS; save(); Net.publish();
   }
   function onFeed(){ const l=s.days[s.days.length-1]; if(l) l.f++; s.feeds++; layer=null; save(); Net.publish(); }
   function sex(){ if(!s.sex){ s.sex=Math.random()<.5?'male':'female'; save(); } return s.sex; }
@@ -41,5 +50,5 @@ const Persist = (()=>{
     });
   }
   function draw(){ if(!layer) build(); ctx.drawImage(layer,0,0); }
-  return { state:()=>s, adopt, load, save, onFeed, sex, draw, invalidate(){ layer=null; } };
+  return { state:()=>s, dirt, reduceDirt, adopt, load, save, onFeed, sex, draw, invalidate(){ layer=null; } };
 })();

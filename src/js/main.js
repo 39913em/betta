@@ -67,6 +67,7 @@ function loop(now){
   drawPlantsSet(t,plants,.30);
   drawPlantsSet(t,plantsFg,1);
 
+  Decay.draw(t);
   Net.drawWater(dt);
   drawFoodHint(t,dt,mouse);
 

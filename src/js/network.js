@@ -18,7 +18,7 @@ const Net = (()=>{
   const now=()=>Date.now();
   const sid=i=>'s'+i;
   const abandoned=s=>s && s.owner && now()-s.t>ABANDON_MS;
-  const isFree=s=>!s || !s.owner || abandoned(s);
+  const isFree=s=>!s || (!s.owner && !(s.res>now())) || abandoned(s);   /* reservado por PIN = no libre */
   const timeout=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 
   /* ---------- arranque: se observa SIN pedir cuenta ---------- */
@@ -45,14 +45,21 @@ const Net = (()=>{
     return { role, slot:mySlot, state: mySlot?slots[sid(mySlot)]:null };
   }
   /* se llama SOLO tras aceptar la responsiva: pide cuenta de Google y toma un lugar */
-  async function takeSlot(){
+  async function takeSlot(pin){
     if(!online) return {ok:false,reason:'Sin conexión con la red del bioma.'};
     if(now()<+(localStorage.getItem(NOCLAIM_KEY)||0)) return {ok:false,reason:'Cediste un lugar hace poco. Podrás tomar otro pasadas 24 horas.'};
     try{
       if(!uid){ const c=await firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()); uid=c.user.uid; }
       slots=(await slotsRef.once('value')).val()||{};
       for(let i=1;i<=N && !mySlot;i++) if(slots[sid(i)] && slots[sid(i)].owner===uid) mySlot=i;
-      for(let i=1;i<=N && !mySlot;i++) if(isFree(slots[sid(i)]) && await claim(i)) mySlot=i;
+      if(pin && !mySlot){
+        const p=(await firebase.database().ref('pins/'+pin).once('value')).val();
+        if(!p || now()-p.t>3*864e5) return {ok:false,reason:'PIN inválido o vencido. Pídele a quien te lo dio que genere uno nuevo.'};
+        const i=+p.s.slice(1);
+        if(await claim(i,pin)){ mySlot=i; firebase.database().ref('pins/'+pin).remove().catch(()=>{}); }
+        else return {ok:false,reason:'Ese lugar ya no está disponible.'};
+      }
+      if(!pin) for(let i=1;i<=N && !mySlot;i++) if(isFree(slots[sid(i)]) && await claim(i)) mySlot=i;
       if(!mySlot) return {ok:false,reason:'Los 10 lugares se ocuparon mientras decidías.'};
       role='owner'; startBeat(); recompute();
       return {ok:true, slot:mySlot, state:slots[sid(mySlot)]||null};
@@ -72,12 +79,13 @@ const Net = (()=>{
   const freeCount=()=>{ let c=0; for(let i=1;i<=N;i++) if(isFree(slots[sid(i)])) c++; return c; };
 
   /* transacción: toma el espacio solo si sigue libre */
-  async function claim(i){
+  async function claim(i,pin){
     try{
       const r=await slotsRef.child(sid(i)).transaction(cur=>{
-        if(cur && !isFree(cur)) return;                 /* alguien ganó: abortar */
-        const base=cur||{ x:Math.random()<.5?0:1, n:0, f:0, d:[] };
-        return Object.assign({},base,{ owner:uid, t:now() });
+        if(cur && !isFree(cur) && !(pin && !cur.owner)) return;     /* alguien ganó (o está reservado sin tu PIN) */
+        const base=cur||{ x:Math.random()<.5?0:1, n:0, f:0, d:[], c:now() };
+        const out=Object.assign({},base,{ owner:uid, t:now() }); delete out.res; if(pin) out.pin=pin;
+        return out;
       });
       if(r.committed && r.snapshot.val().owner===uid){ slots[sid(i)]=r.snapshot.val(); return true; }
       return false;
@@ -87,7 +95,7 @@ const Net = (()=>{
   /* ---------- publicar el estado del propio espacio ---------- */
   function record(){
     const s=Persist.state(), last=s.days[s.days.length-1]||{f:0};
-    return { owner:uid, t:now(), f:last.f|0, n:s.feeds|0, x:s.sex==='female'?1:0, d:s.days };
+    return { owner:uid, t:now(), f:last.f|0, n:s.feeds|0, x:s.sex==='female'?1:0, d:s.days, c:s.c };
   }
   function publish(force){
     if(role!=='owner'||!slotsRef) { local(); return; }
@@ -100,12 +108,17 @@ const Net = (()=>{
   function local(){ recompute(); }
 
   /* ---------- ceder el espacio (conserva pez y sedimento) ---------- */
-  async function cede(){
-    if(role!=='owner') return false;
-    await slotsRef.child(sid(mySlot)).update({ owner:null, t:now(), d:Persist.state().days, n:Persist.state().feeds });
+  const genPin=()=>{ const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r=crypto.getRandomValues(new Uint8Array(6)); return Array.from(r,x=>A[x%A.length]).join(''); };
+  /* usePin=true: reserva el lugar 3 días para quien tenga el PIN (herencia). false: queda libre para todos. */
+  async function cede(usePin){
+    if(role!=='owner') return null;
+    const s=Persist.state(); let pin=null;
+    if(usePin){ pin=genPin(); await firebase.database().ref('pins/'+pin).set({ s:sid(mySlot), t:now() }); }
+    const upd={ owner:null, t:now(), d:s.days, n:s.feeds, c:s.c }; if(pin) upd.res=now()+3*864e5;
+    await slotsRef.child(sid(mySlot)).update(upd);
     localStorage.setItem(NOCLAIM_KEY, String(now()+864e5));   /* 24 h sin retomar */
     mySlot=null; role='spectator';
-    return true;
+    return pin||true;
   }
 
   /* ---------- agua común (calculada) ---------- */
@@ -132,7 +145,7 @@ const Net = (()=>{
   function slotsInfo(){
     return Array.from({length:N},(_,k)=>{
       const i=k+1, s=slots[sid(i)], age=s?(now()-s.t)/864e5:0;
-      const st=!s||!s.owner?'libre':s.owner===uid?'tuyo':age>7?'en rescate':age>3?'en riesgo':'cuidado';
+      const st=s&&!s.owner&&s.res>now()?'reservado':!s||!s.owner?'libre':s.owner===uid?'tuyo':age>7?'en rescate':age>3?'en riesgo':'cuidado';
       return { i, st, sex:s?(s.x===1?'♀':'♂'):'', d:(s&&s.d||[]).filter(Boolean).slice(-30), history:!!(s&&s.n) };
     });
   }
