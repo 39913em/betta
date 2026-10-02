@@ -1,18 +1,7 @@
-/* ============================================================
-   RED · 10 ESPACIOS ABIERTOS + AGUA COMÚN
-   - Se mira sin cuenta; al tomar un lugar se pide cuenta de Google.
-   - Hay 10 espacios (s1..s10). Quien llega toma el primero libre
-     mediante una transacción atómica: nadie pisa a nadie.
-   - El estado del bioma (pez, sedimento) vive en el espacio, no
-     en el navegador: ceder = soltar el espacio con todo su estado.
-   - Un espacio sin actividad ABANDON_MS queda en "rescate" y
-     cualquiera puede tomarlo.
-   - El agua común no se guarda: se calcula con los espacios.
-   Roles: 'owner' (cuida un espacio) · 'spectator' (mira) · 'local' (sin red)
-   ============================================================ */
+
 const Net = (()=>{
   const N=10, ABANDON_MS=7*864e5, FEED_MS=864e5, BEAT_MS=3e5, NOCLAIM_KEY='betta.noClaimUntil';
-  let slotsRef=null, slots={}, uid=null, mySlot=null, role='local', online=false;
+  let claimErr='', slotsRef=null, slots={}, uid=null, mySlot=null, role='local', online=false;
   let water=0, target=0, pubT=0, pubTimer=null, error='';
 
   const now=()=>Date.now();
@@ -21,7 +10,6 @@ const Net = (()=>{
   const isFree=s=>!s || (!s.owner && !(s.res>now())) || abandoned(s);   /* reservado por PIN = no libre */
   const timeout=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 
-  /* ---------- arranque: se observa SIN pedir cuenta ---------- */
   async function init(){
     if(!FIREBASE_CONFIG || typeof firebase==='undefined' || !firebase.auth) return {role:'local'};
     try{ return await timeout(boot(),7000); }
@@ -36,7 +24,6 @@ const Net = (()=>{
       slots=s.val()||{}; recompute();
       if(mySlot && (!slots[sid(mySlot)] || slots[sid(mySlot)].owner!==uid)){ mySlot=null; role='spectator'; }
     },()=>{ online=false; });
-    /* con sesión previa se recupera el espacio; sin sesión no se pide nada */
     const user=await new Promise(res=>{ const off=firebase.auth().onAuthStateChanged(u=>{ off(); res(u); }); });
     if(user){ uid=user.uid; for(let i=1;i<=N;i++) if(slots[sid(i)] && slots[sid(i)].owner===uid) mySlot=i; }
     role=mySlot?'owner':'spectator';
@@ -44,7 +31,7 @@ const Net = (()=>{
     recompute();
     return { role, slot:mySlot, state: mySlot?slots[sid(mySlot)]:null };
   }
-  /* se llama SOLO tras aceptar la responsiva: pide cuenta de Google y toma un lugar */
+ 
   async function takeSlot(pin){
     if(!online) return {ok:false,reason:'Sin conexión con la red del bioma.'};
     if(now()<+(localStorage.getItem(NOCLAIM_KEY)||0)) return {ok:false,reason:'Cediste un lugar hace poco. Podrás tomar otro pasadas 24 horas.'};
@@ -60,7 +47,12 @@ const Net = (()=>{
         else return {ok:false,reason:'Ese lugar ya no está disponible.'};
       }
       if(!pin) for(let i=1;i<=N && !mySlot;i++) if(isFree(slots[sid(i)]) && await claim(i)) mySlot=i;
-      if(!mySlot) return {ok:false,reason:'Los 10 biomas se ocuparon mientras decidías.'};
+      if(!mySlot){
+        if(claimErr) return {ok:false,reason:/permission/i.test(claimErr)
+          ? 'Firebase rechazó la escritura: las reglas publicadas no coinciden con esta versión. Pega el database.rules.json más reciente en Realtime Database > Reglas y publica.'
+          : 'No se pudo reservar el lugar: '+claimErr};
+        return {ok:false,reason:'Los 10 biomas se ocuparon mientras decidías.'};
+      }
       role='owner'; startBeat(); recompute();
       return {ok:true, slot:mySlot, state:slots[sid(mySlot)]||null};
     }catch(e){ return {ok:false,reason:humanize(e)}; }
@@ -78,7 +70,6 @@ const Net = (()=>{
   function startBeat(){ if(!beat) beat=setInterval(()=>{ if(!document.hidden) publish(true); },BEAT_MS); }
   const freeCount=()=>{ let c=0; for(let i=1;i<=N;i++) if(isFree(slots[sid(i)])) c++; return c; };
 
-  /* transacción: toma el espacio solo si sigue libre */
   async function claim(i,pin){
     try{
       const r=await slotsRef.child(sid(i)).transaction(cur=>{
@@ -89,10 +80,9 @@ const Net = (()=>{
       });
       if(r.committed && r.snapshot.val().owner===uid){ slots[sid(i)]=r.snapshot.val(); return true; }
       return false;
-    }catch(e){ return false; }
+    }catch(e){ claimErr=(e&&(e.code||e.message))||'error'; console.warn('[Betta] claim fallido:',e); return false; }
   }
 
-  /* ---------- publicar el estado del propio espacio ---------- */
   function record(){
     const s=Persist.state(), last=s.days[s.days.length-1]||{f:0};
     return { owner:uid, t:now(), f:last.f|0, n:s.feeds|0, x:s.sex==='female'?1:0, d:s.days, c:s.c };
@@ -107,9 +97,8 @@ const Net = (()=>{
   }
   function local(){ recompute(); }
 
-  /* ---------- ceder el espacio (conserva pez y sedimento) ---------- */
   const genPin=()=>{ const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r=crypto.getRandomValues(new Uint8Array(6)); return Array.from(r,x=>A[x%A.length]).join(''); };
-  /* usePin=true: reserva el lugar 3 días para quien tenga el PIN (herencia). false: queda libre para todos. */
+  
   async function cede(usePin){
     if(role!=='owner') return null;
     const s=Persist.state(); let pin=null;
@@ -121,7 +110,6 @@ const Net = (()=>{
     return pin||true;
   }
 
-  /* ---------- agua común (calculada) ---------- */
   function recompute(){
     let load=0;
     for(let i=1;i<=N;i++){ const s=slots[sid(i)]; if(s && now()-s.t<FEED_MS) load+=Math.min(12,s.f|0); }
@@ -149,7 +137,6 @@ const Net = (()=>{
       return { i, st, sex:s?(s.x===1?'♀':'♂'):'', d:(s&&s.d||[]).filter(Boolean).slice(-30), history:!!(s&&s.n) };
     });
   }
-  /* lo que ve un observador: el estado real del lugar más descuidado */
   function viewDirt(){
     let m=null;
     for(let i=1;i<=N;i++){ const s=slots[sid(i)]; if(!s||!s.owner) continue;
