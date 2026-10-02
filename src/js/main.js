@@ -39,7 +39,6 @@ function loop(now){
   readMic();
 
   ctx.drawImage(swampCanvas,0,0);
-  Persist.draw();
 
   drawPlantsSet(t,plants,.62);
   drawPlantsSet(t,plantsFg,.16);

@@ -149,6 +149,13 @@ const Net = (()=>{
       return { i, st, sex:s?(s.x===1?'♀':'♂'):'', d:(s&&s.d||[]).filter(Boolean).slice(-30), history:!!(s&&s.n) };
     });
   }
-  return { init, slotsInfo, waterLevel:()=>water, takeSlot, freeCount, online:()=>online, publish, cede, drawWater,
+  /* lo que ve un observador: el estado real del lugar más descuidado */
+  function viewDirt(){
+    let m=null;
+    for(let i=1;i<=N;i++){ const s=slots[sid(i)]; if(!s||!s.owner) continue;
+      const d=Math.max(0,Math.min(1,(now()-(s.c||s.t))/(6*864e5))); if(m===null||d>m) m=d; }
+    return m;
+  }
+  return { init, viewDirt, slotsInfo, waterLevel:()=>water, takeSlot, freeCount, online:()=>online, publish, cede, drawWater,
     canFeed:()=>role!=='spectator', isOwner:()=>role==='owner', role:()=>role };
 })();

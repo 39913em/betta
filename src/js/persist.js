@@ -31,7 +31,11 @@ const Persist = (()=>{
   /* salud del bioma: 0 = limpio, 1 = abandonado ~6 días. ?dirt=0.8 fuerza un valor para probar */
   const DECAY_MS=6*864e5, dm=(typeof location!=='undefined'&&location.search.match(/[?&]dirt=([\d.]+)/));
   let dbg=dm?Math.min(1,+dm[1]):null;
-  const dirt=()=>dbg!==null?dbg:Math.max(0,Math.min(1,(Date.now()-s.c)/DECAY_MS));
+  const dirt=()=>{
+    if(dbg!==null) return dbg;
+    if(Net.role()==='spectator'){ const v=Net.viewDirt(); if(v!==null) return v; }
+    return Math.max(0,Math.min(1,(Date.now()-s.c)/DECAY_MS));
+  };
   function reduceDirt(d){
     if(dbg!==null){ dbg=Math.max(0,dbg-d); return; }
     s.c=Date.now()-Math.max(0,dirt()-d)*DECAY_MS; save(); Net.publish();
