@@ -1,10 +1,4 @@
-/* ============================================================
-   PERSISTENCIA + SEDIMENTO (Fase 1 · local)
-   El bioma recuerda entre sesiones. Cada día de visita deja una
-   capa en el fondo; cuanto más se alimenta, más oscura y cálida.
-   Sin números en pantalla: el dato es materia.
-   Para pasar a Firebase (Fase 2) basta sustituir load()/save().
-   ============================================================ */
+
 const Persist = (()=>{
   const KEY='betta.bioma.v1', MAX_LAYERS=90;
   let s={ v:1, c:0, id:null, sex:null, first:0, lastDay:'', days:[], feeds:0 };
@@ -19,7 +13,6 @@ const Persist = (()=>{
     if(s.lastDay!==d){ s.days.push({d,f:0}); s.lastDay=d; if(s.days.length>MAX_LAYERS) s.days.shift(); save(); }
   }
   function save(){ try{ localStorage.setItem(KEY,JSON.stringify(s)); }catch(e){} }
-  /* el espacio en la nube manda: hidrata el estado local con el del espacio */
   function adopt(rec){
     if(!rec) return;
     s.c=rec.c||Date.now(); s.sex=rec.x===1?'female':'male'; s.days=(rec.d||[]).filter(Boolean); s.feeds=rec.n|0;
@@ -28,7 +21,7 @@ const Persist = (()=>{
     if(s.lastDay!==d||!s.days.length||s.days[s.days.length-1].d!==d){ s.days.push({d,f:0}); if(s.days.length>MAX_LAYERS) s.days.shift(); }
     s.lastDay=d; layer=null; save();
   }
-  /* salud del bioma: 0 = limpio, 1 = abandonado ~6 días. ?dirt=0.8 fuerza un valor para probar */
+
   const DECAY_MS=6*864e5, dm=(typeof location!=='undefined'&&location.search.match(/[?&]dirt=([\d.]+)/));
   let dbg=dm?Math.min(1,+dm[1]):null;
   const dirt=()=>{

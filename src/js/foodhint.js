@@ -1,6 +1,4 @@
-/* ============================================================
-   FOOD INVITATION — círculo (moneda de 5 pesos), sin texto
-   ============================================================ */
+
 const foodCircle = { x:0, y:0, r:0 };
 let foodHintMotes=[];
 let foodHoverT=0;

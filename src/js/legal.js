@@ -1,4 +1,4 @@
-/* Textos legales: se muestran dentro de la ventana flotante (sin abrir otra pestaña). */
+
 const LEGAL={
  "terms": {
   "title": "Términos y condiciones",

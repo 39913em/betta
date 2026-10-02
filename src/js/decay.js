@@ -1,11 +1,4 @@
-/* ============================================================
-   DETERIORO Y LIMPIEZA
-   El descuido se VE: residuos, malesa (maleza) y moho aparecen en
-   el fondo, y el agua verdea. Se limpia arrastrando sobre ellos
-   (clic sostenido o dedo). 18 elementos como máximo; cada uno
-   limpiado devuelve 1/18 de salud al bioma.
-   Corresponde a los estados «Agonizando» → «Rescatado» del diseño.
-   ============================================================ */
+
 const Decay=(()=>{
   const N=18, HIT_MS=90, R=26;
   let seed=20260930; const rnd=()=>(seed=(seed*1664525+1013904223)>>>0)/4294967296;
@@ -17,7 +10,7 @@ const Decay=(()=>{
   const count=()=>Math.round(Persist.dirt()*N);
 
   function drawItem(it,t){
-    const x=it.nx*W, y=it.ny*H, k=1-it.hits/it.need*0.7;           /* se desvanece al frotarlo */
+    const x=it.nx*W, y=it.ny*H, k=1-it.hits/it.need*0.7;           
     ctx.save(); ctx.globalAlpha=k;
     if(it.kind==='residuo'){
       ctx.fillStyle='rgba(95,72,45,.9)';
@@ -39,13 +32,12 @@ const Decay=(()=>{
   }
   function draw(t){
     const d=Persist.dirt(); if(d<=0.01) return;
-    ctx.fillStyle=`rgba(46,96,40,${(d*0.26).toFixed(3)})`; ctx.fillRect(0,0,W,H);            /* agua verdosa */
-    const g=ctx.createLinearGradient(0,H*.78,0,H);                                           /* película de algas en el cristal */
+    ctx.fillStyle=`rgba(46,96,40,${(d*0.26).toFixed(3)})`; ctx.fillRect(0,0,W,H);            
+    const g=ctx.createLinearGradient(0,H*.78,0,
     g.addColorStop(0,'rgba(40,86,34,0)'); g.addColorStop(1,`rgba(40,86,34,${(d*.5).toFixed(3)})`);
     ctx.fillStyle=g; ctx.fillRect(0,H*.78,W,H*.22);
     const T=count(); for(let i=0;i<T;i++) drawItem(items[i],t);
   }
-  /* frotar: devuelve true si limpió algo */
   function scrub(px,py){
     if(!Net.canFeed()) return false;
     const T=count(), now=performance.now(); let did=false;
@@ -54,7 +46,7 @@ const Decay=(()=>{
       if(Math.hypot(px-it.nx*W,py-it.ny*H)>R*dpr || now-it.last<HIT_MS) continue;
       it.last=now; it.hits++; did=true;
       if(it.hits>=it.need){
-        it.hits=0; items[i]=items[T-1]; items[T-1]=it;     /* el limpiado sale de la ventana visible */
+        it.hits=0; items[i]=items[T-1]; items[T-1]=it;     
         Persist.reduceDirt(1/N); break;
       }
     }

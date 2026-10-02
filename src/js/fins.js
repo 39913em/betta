@@ -1,6 +1,4 @@
-/* ============================================================
-   SPINE
-   ============================================================ */
+
 class Spine{
   constructor(len,n){
     this.len=len; this.n=n;
@@ -22,9 +20,7 @@ class Spine{
   }
 }
 
-/* ============================================================
-   RAY FIN
-   ============================================================ */
+
 class RayFin{
   constructor(nRays,nSegs,len,fanAngle){
     this.nRays=nRays; this.nSegs=nSegs;

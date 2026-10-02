@@ -1,6 +1,4 @@
-/* ============================================================
-   AUDIO
-   ============================================================ */
+
 let actx,master,started=false,analyser,micData,micActive=false;
 async function initAudio(){
   if(started) return; started=true;
