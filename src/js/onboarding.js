@@ -41,7 +41,7 @@ const Onboarding=(()=>{
       return card('¿Miras o cuidas?',
       `<p>${on?`Hay <b>${n}</b> de 10 lugares libres.`:'La red del bioma no está disponible ahora; puedes mirar en modo local.'}</p>
        <p><b>MIRAR</b> no requiere cuenta ni datos. <b>CUIDAR</b> requiere iniciar sesión con Google y aceptar un compromiso.</p>${err()}`,
-      btn('watch','MIRAR','ghost')+(on?btn('haspin','Tengo un PIN','ghost'):'')+btn('invite','INVITAR','ghost')+(on&&n>0?btn('pledge','CUIDAR'):'')); },
+      btn('watch','MIRAR','ghost')+(on?btn('haspin','PIN','ghost'):'')+btn('invite','INVITAR','ghost')+(on&&n>0?btn('pledge','CUIDAR'):'')); },
     pledge:()=>card('Tu compromiso como cuidador',
       `<ul><li>Un lugar es un pez y su bioma. <b>Te comprometes a visitarlo, alimentarlo y limpiarlo.</b></li>
        <li>Si ya no puedes, <b>lo cedes</b> (mantener pulsado 3 s sobre el fondo): lo dejas libre o lo heredas a alguien con un PIN.</li>
