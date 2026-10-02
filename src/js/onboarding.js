@@ -1,4 +1,10 @@
-
+/* ============================================================
+   VENTANA ÚNICA: introducción, tutorial, decisión, responsiva,
+   Los 10, invitar, ceder, términos y privacidad.
+   Una sola ventana; abajo siempre la misma barra de secciones
+   (Acerca de · Los 10 · Términos · Privacidad · Cerrar).
+   Mirar es libre y sin cuenta; la cuenta se pide solo al tomar lugar.
+   ============================================================ */
 const Onboarding=(()=>{
   const ob=document.getElementById('ob'), care=document.getElementById('care'), foot=document.getElementById('foot');
   const SEEN='betta.introSeen', TABS=[['about','Acerca de'],['gallery','Los 10'],['terms','Términos'],['priv','Privacidad']];

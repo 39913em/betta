@@ -1,4 +1,6 @@
-
+/* ============================================================
+   EVENTOS — ratón y táctil
+   ============================================================ */
 function canvasPos(cx,cy){
   const r=canvas.getBoundingClientRect();
   return {x:(cx-r.left)*dpr, y:(cy-r.top)*dpr};
@@ -28,6 +30,7 @@ canvas.addEventListener('touchstart', e=>{
   } else { lastTapT=nowT; lastTapX=p.x; lastTapY=p.y; }
 }, {passive:true});
 
+/* Ceder el espacio: mantener pulsado 3 s sobre el sedimento (franja inferior) */
 let holdT=null;
 function holdStart(p){
   if(!Net.isOwner() || p.y < H*WATER_FLOOR_FRAC) return;
@@ -38,6 +41,7 @@ canvas.addEventListener('mousedown', e=>holdStart(canvasPos(e.clientX,e.clientY)
 canvas.addEventListener('touchstart', e=>holdStart(canvasPos(e.touches[0].clientX,e.touches[0].clientY)), {passive:true});
 ['mouseup','mouseleave','touchend','touchcancel','touchmove'].forEach(ev=>canvas.addEventListener(ev,holdCancel,{passive:true}));
 
+/* Limpiar: arrastrar (clic sostenido o dedo) sobre residuos, malesa y moho */
 let pressed=false;
 function scrubAt(p){ if(pressed && Decay.scrub(p.x,p.y)) holdCancel(); }
 canvas.addEventListener('mousedown',()=>{ pressed=true; });

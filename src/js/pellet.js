@@ -1,4 +1,6 @@
-
+/* ============================================================
+   CRÍAS
+   ============================================================ */
 let babies=[];
 function spawnBaby(parent){
   if(createdBettas>=MAX_BETTAS || reproductionComplete) return null;
@@ -22,7 +24,9 @@ function spawnBaby(parent){
 }
 
 function allBettas(){ return [betta,...babies]; }
-
+/* ============================================================
+   PELLETS — caen dentro de la banda de nado
+   ============================================================ */
 class Pellet{
   constructor(x,y){
     this.x=x; this.y=y;

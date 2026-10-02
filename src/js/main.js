@@ -1,4 +1,6 @@
-
+/* ============================================================
+   INSTANCIAS
+   ============================================================ */
 let betta;
 let mouse=null;
 
@@ -11,21 +13,25 @@ function start(){
 }
 
 start();
+/* El estado del espacio en la nube manda sobre el local */
 function becomeOwner(state){
   const before=Persist.state().sex;
   Persist.adopt(state);
   if(Persist.state().sex!==before) betta=new Betta(Persist.state().sex,{variant:'original',isFounder:true,isAdult:true,depthPlane:2});
   Net.publish(true);
 }
-
+/* Red + introducción: se observa primero; la cuenta solo se pide al tomar un lugar */
 Net.init().then(r=>{ if(r.role==='owner') becomeOwner(r.state); Onboarding.start(r); });
+/* PERF: buildSwamp es caro; solo se reconstruye cuando el resize se detiene */
 let resizeTimer;
 addEventListener('resize',()=>{
   clearTimeout(resizeTimer);
   resizeTimer=setTimeout(()=>{resize();initFoodHint();Persist.invalidate();},150);
 });
 
-
+/* ============================================================
+   LOOP — 5 planos reales
+   ============================================================ */
 let last=performance.now();
 function loop(now){
   const dt=Math.min((now-last)/1000,.033);last=now;const t=now/1000;
