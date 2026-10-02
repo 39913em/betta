@@ -1,13 +1,7 @@
-/* ============================================================
-   VENTANA ÚNICA: introducción, tutorial, decisión, responsiva,
-   10 Biomas, invitar, ceder, términos y privacidad.
-   Una sola ventana; abajo siempre la misma barra de secciones
-   (Acerca de · Cómo funciona · 10 Biomas · Términos · Privacidad · Cerrar).
-   Mirar es libre y sin cuenta; la cuenta se pide solo al tomar lugar.
-   ============================================================ */
+
 const Onboarding=(()=>{
   const ob=document.getElementById('ob'), care=document.getElementById('care');
-  const SEEN='betta.introSeen', TABS=[['about','Acerca de'],['how','Cómo funciona'],['gallery','10 Biomas'],['terms','Términos'],['priv','Privacidad']];
+  const SEEN='betta.introSeen', TABS=[['','Acerca de'],['how','Cómo funciona'],['gallery','10 Biomas'],['terms','Términos'],['priv','Privacidad']];
   const MAIN=new Set(['about','how','gallery','invite','terms','priv']);
   const q=typeof location!=='undefined'?location.search:'';
   let busy=false, msg='', last={}, cur='', prev=null, ck=[false,false,false], pinMode=false, pinVal='', myPin='';
@@ -24,17 +18,17 @@ const Onboarding=(()=>{
   };
   const steps={
     about:()=>card('BETTA-BIOMA',
-      `<p>Un acuario que vive en tu pantalla y se comparte entre <b>10 cuidadores</b>. Un pez, un bioma, diez lugares.</p>
-       <p>Lo que cada persona hace —alimentar, limpiar, ausentarse— cambia el agua de todos. Sin humanos el bioma resiste mucho tiempo: <b>el humano es la alteración</b>.</p>
-       <p>Puedes mirar sin cuenta. Si quieres cuidar, más adelante te lo explicamos con claridad.</p>`,
+      `<p>Un acuario que se comparte entre <b>10 cuidadores</b>.</p>
+       <p>Lo que cada persona hace: alimentar, limpiar, (ausentarse cambia el agua de todos) Sin humanos el bioma resiste mucho tiempo: <b>el humano es la alteración</b>.</p>
+       <p>Puedes mirar sin intervenir. ¿quieres cuidar una parte del bioma?</p>`,
       btn('decide','Saltar','ghost')+btn('how','Siguiente')),
     how:()=>card('Cómo funciona',
       `<ul><li><b>Mira.</b> El pez sigue tu cursor y reacciona al sonido. Al tocar el agua se te ofrece activar el micrófono (opcional; el audio nunca se graba ni se envía).</li>
-       <li><b>Alimenta</b> (solo cuidadores): doble clic o doble toque sobre el círculo de comida.</li>
-       <li><b>El agua es de todos.</b> Si la red alimenta mucho se enturbia en ámbar; si nadie lo hace, se aclara.</li>
-       <li><b>El descuido se ve.</b> Si el cuidador se ausenta aparecen residuos, malesa y moho, y el agua verdea. Se limpia <b>arrastrando</b> sobre ellos (clic sostenido o dedo).</li>
+       <li><b>Alimenta.</b> (solo cuidadores): doble toque sobre el círculo de comida.</li>
+       <li><b>El agua es de todos.</b> Si la red interviene mucho el agua (de TODOS) se enturbia en ámbar; si nadie lo hace, se aclara.</li>
+       <li><b>El descuido se ve.</b> Si el cuidador se ausenta aparecen residuos, malesa y moho, y el agua verdea. Se limpia <b>arrastrando</b> sobre los residuos.</li>
        <li><b>Si no tienes lugar</b> ves el estado real del lugar más descuidado, pero no puedes tocarlo: para ayudar, toma un lugar o invita a alguien.</li>
-       <li><b>Ceder o heredar.</b> Mantén pulsado 3 s sobre el fondo: deja tu lugar libre o dáselo a alguien con un PIN.</li></ul>`,
+       <li><b>Ceder.</b> Mantén pulsado 3 s sobre el fondo: deja tu lugar libre o dáselo a alguien con un PIN.</li></ul>`,
       btn('about','Atrás','ghost')+btn('decide','Siguiente')),
     decide:()=>{
       const on=Net.online(), n=on?Net.freeCount():0;
@@ -43,7 +37,7 @@ const Onboarding=(()=>{
        <p><b>MIRAR</b> no requiere cuenta ni datos. <b>CUIDAR</b> requiere iniciar sesión con Google y aceptar un compromiso.</p>${err()}`,
       btn('watch','MIRAR','ghost')+(on?btn('haspin','PIN','ghost'):'')+btn('invite','INVITAR','ghost')+(on&&n>0?btn('pledge','CUIDAR'):'')); },
     pledge:()=>card('Tu compromiso como cuidador',
-      `<ul><li>Un lugar es un pez y su bioma. <b>Te comprometes a visitarlo, alimentarlo y limpiarlo.</b></li>
+      `<ul><li>Un lugar es un bioma y su fauna. <b>Te comprometes a visitarlo, alimentarlo y limpiarlo.</b></li>
        <li>Si ya no puedes, <b>lo cedes</b> (mantener pulsado 3 s sobre el fondo): lo dejas libre o lo heredas a alguien con un PIN.</li>
        <li>Un lugar sin actividad durante <b>7 días</b> queda en rescate y cualquiera puede tomarlo.</li>
        <li>Usamos tu cuenta de Google solo para identificarte como dueño. Guardamos un identificador, no tus mensajes ni tu audio.</li></ul>

@@ -1,6 +1,4 @@
-/* ============================================================
-   ARTEMIA — confinada a la banda de nado
-   ============================================================ */
+
 class Artemia{
   constructor(x,y){
     this.x=x; this.y=y;

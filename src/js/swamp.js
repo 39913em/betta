@@ -1,20 +1,11 @@
-/* ============================================================
-   SWAMP
-   ============================================================ */
+
 let swampCanvas, plants=[], plantsFg=[], motes=[];
 function buildSwamp(){
   swampCanvas=document.createElement('canvas');
   swampCanvas.width=W; swampCanvas.height=H;
   const c=swampCanvas.getContext('2d');
 
-  /* ==========================================================
-     5 PLANOS VISUALES
-     5 = agua / fondo
-     4 = madera y vegetación lejana
-     3 = peces lejanos + plantas medias
-     2 = peces medios + vegetación central
-     1 = peces cercanos + alfombra frontal
-     ========================================================== */
+ 
 
   const water=c.createLinearGradient(0,0,0,H);
   water.addColorStop(0,'#101a18');
@@ -26,7 +17,6 @@ function buildSwamp(){
   c.fillStyle=water;
   c.fillRect(0,0,W,H);
 
-  /* fondo difuso, sin rayos de luz */
   const haze=c.createLinearGradient(0,0,0,H*0.55);
   haze.addColorStop(0,'rgba(150,190,170,0.10)');
   haze.addColorStop(0.30,'rgba(75,125,100,0.06)');
@@ -34,7 +24,6 @@ function buildSwamp(){
   c.fillStyle=haze;
   c.fillRect(0,0,W,H*0.65);
 
-  /* Plano 4: masas vegetales lejanas */
   for(let i=0;i<26;i++){
     const x=W*(0.02+Math.random()*0.96);
     const base=H*(0.73+Math.random()*0.18);
@@ -54,9 +43,7 @@ function buildSwamp(){
     c.stroke();
   }
 
-  /* ==========================================================
-     PLANO 5 — profundidad espacial
-     ========================================================== */
+ 
   for(let i=0;i<42;i++){
     const x=W*(.01+Math.random()*.98);
     const base=H*(.72+Math.random()*.22);
@@ -102,9 +89,7 @@ function buildSwamp(){
   c.fillStyle=farMist;
   c.fillRect(0,0,W,H*.78);
 
-  /* ==========================================================
-     MADERA CENTRAL — estructura orgánica
-     ========================================================== */
+  
   function branch(points,width,depth,seed){
     const nSegs=points.length-1;
     const perSeg=14;
@@ -303,9 +288,7 @@ function buildSwamp(){
   c.fillStyle=shadow;
   c.fillRect(0,0,W,H);
 
-  /* ==========================================================
-     SUSTRATO — capas reales de acuario plantado
-     ========================================================== */
+ 
   const floorY=H*0.91;
 
   const sg=c.createLinearGradient(0,floorY-40*dpr,0,H);
@@ -392,9 +375,7 @@ function buildSwamp(){
   c.fillStyle=contact;
   c.fillRect(0,floorY-8*dpr,W,14*dpr);
 
-  /* ==========================================================
-     ALFOMBRA DELANTERA — Rosetas individuales
-     ========================================================== */
+ 
   for(let i=0;i<140;i++){
     const x=W*(0.01+Math.random()*0.98);
     const y=H*(0.90+Math.random()*0.10);
@@ -428,9 +409,7 @@ function buildSwamp(){
     }
   }
 
-  /* ==========================================================
-     MASA VEGETAL DERECHA — más densa, 220 items, 4 tonos de verde
-     ========================================================== */
+ 
   const rightSpecies = ['vallis','sagitt','stem','vallis','sagitt','vallis','vallis','sagitt'];
 
   for(let i=0;i<220;i++){
@@ -514,9 +493,7 @@ function buildSwamp(){
     }
   }
 
-  /* ==========================================================
-     ANUBIAS SOBRE EL TRONCO — racimos orgánicos anclados a nudos
-     ========================================================== */
+ 
   const anubiasAnchors=[
     {x:.48,y:.82},{x:.46,y:.72},{x:.44,y:.62},
     {x:.42,y:.52},{x:.40,y:.44},{x:.44,y:.36},
@@ -617,12 +594,7 @@ function buildSwamp(){
     }
   }
 
-  /* ==========================================================
-     DIVERSIDAD BOTÁNICA
-     Musgo real (filamentos), Vallisneria en grupos,
-     Cryptocoryne en roseta, rocas tapizadas.
-     ========================================================== */
-
+ 
   const mossZones=[
     {x0:W*0.10,y0:H*0.55,x1:W*0.90,y1:H*0.85,density:260},
     {x0:W*0.28,y0:H*0.32,x1:W*0.72,y1:H*0.55,density:120},
@@ -653,7 +625,6 @@ function buildSwamp(){
     }
   }
 
-  /* --- Vallisneria: grupos vivos con gradiente real y curvas cruzadas --- */
   for(let g=0;g<26;g++){
     const gx=W*(0.02+Math.random()*0.96);
     const gy=H*(0.89+Math.random()*0.06);
@@ -846,7 +817,6 @@ function drawPlantsSet(t, set, alphaMul){
       const sway=Math.sin(t*0.6+bl.phase)*bl.sway*dpr;
       const tipX=cl.x+bl.ox+sway, tipY=cl.y-bl.height;
       const midX=cl.x+bl.ox+sway*0.35, midY=cl.y-bl.height*0.55;
-      /* PERF: degradado cacheado por hoja y opacidad (antes ~3 por hoja por frame) */
       const key=alphaMul.toFixed(2), cache=bl._g||(bl._g={});
       let g=cache[key];
       if(!g){

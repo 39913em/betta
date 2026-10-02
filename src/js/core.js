@@ -11,7 +11,6 @@ const CFG = {
   NEST_BUILD_DT: 0.35,
 };
 
-// ===== PLANOS: banda de nado del pez (plano 2) =====
 const SWIM_BAND = { topFrac: 0.08, botFrac: 0.93 };
 const WATER_FLOOR_FRAC = 0.91;
 const DEPTH_MIN=1, DEPTH_MAX=5;
