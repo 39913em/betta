@@ -38,3 +38,5 @@ canvas{display:block;width:100vw;height:100vh}
 #ob button.tab.x{margin-left:auto;border-color:rgba(160,190,165,.3)}
 #ob .link{width:100%;box-sizing:border-box;font:13px ui-monospace,monospace;padding:9px 10px;border-radius:8px;border:1px solid rgba(160,190,165,.4);background:#0a120d;color:#e8d9b0}
 #ob .ok{color:#9fd6a8}
+#foot2{position:fixed;left:14px;bottom:10px;font:12px Georgia,serif;letter-spacing:1px;z-index:5;opacity:.6}
+#foot2 a{color:#c2d4c6;text-decoration:none;border-bottom:1px dotted rgba(194,212,198,.45)}#foot2 a:hover{opacity:1;color:#e8d9b0}

@@ -60,7 +60,7 @@ const Net = (()=>{
         else return {ok:false,reason:'Ese lugar ya no está disponible.'};
       }
       if(!pin) for(let i=1;i<=N && !mySlot;i++) if(isFree(slots[sid(i)]) && await claim(i)) mySlot=i;
-      if(!mySlot) return {ok:false,reason:'Los 10 lugares se ocuparon mientras decidías.'};
+      if(!mySlot) return {ok:false,reason:'Los 10 biomas se ocuparon mientras decidías.'};
       role='owner'; startBeat(); recompute();
       return {ok:true, slot:mySlot, state:slots[sid(mySlot)]||null};
     }catch(e){ return {ok:false,reason:humanize(e)}; }

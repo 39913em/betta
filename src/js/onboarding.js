@@ -1,13 +1,13 @@
 /* ============================================================
    VENTANA ÚNICA: introducción, tutorial, decisión, responsiva,
-   Los 10, invitar, ceder, términos y privacidad.
+   10 Biomas, invitar, ceder, términos y privacidad.
    Una sola ventana; abajo siempre la misma barra de secciones
-   (Acerca de · Los 10 · Términos · Privacidad · Cerrar).
+   (Acerca de · Cómo funciona · 10 Biomas · Términos · Privacidad · Cerrar).
    Mirar es libre y sin cuenta; la cuenta se pide solo al tomar lugar.
    ============================================================ */
 const Onboarding=(()=>{
-  const ob=document.getElementById('ob'), care=document.getElementById('care'), foot=document.getElementById('foot');
-  const SEEN='betta.introSeen', TABS=[['about','Acerca de'],['gallery','Los 10'],['terms','Términos'],['priv','Privacidad']];
+  const ob=document.getElementById('ob'), care=document.getElementById('care');
+  const SEEN='betta.introSeen', TABS=[['about','Acerca de'],['how','Cómo funciona'],['gallery','10 Biomas'],['terms','Términos'],['priv','Privacidad']];
   const MAIN=new Set(['about','how','gallery','invite','terms','priv']);
   const q=typeof location!=='undefined'?location.search:'';
   let busy=false, msg='', last={}, cur='', prev=null, ck=[false,false,false], pinMode=false, pinVal='', myPin='';
@@ -18,16 +18,16 @@ const Onboarding=(()=>{
   const btn=(a,t,c='')=>`<button data-a="${a}" class="${c}">${t}</button>`;
   const err=()=>msg?`<p class="err">${msg}</p>`:'';
   const card=(h,body,btns,nav=true)=>{
-    const act=cur==='how'?'about':cur;
+    const act=cur;
     return `<div class="card"><h1>${h}</h1><div class="body">${body}</div><div class="btns">${btns}</div>`+
       (nav?`<div class="tabs">${TABS.map(([k,t])=>`<button data-a="${k}" class="tab${act===k?' on':''}">${t}</button>`).join('')}<button data-a="close" class="tab x">Cerrar</button></div>`:'')+`</div>`;
   };
   const steps={
-    about:()=>card('BETTA · bioma vivo',
+    about:()=>card('BETTA-BIOMA',
       `<p>Un acuario que vive en tu pantalla y se comparte entre <b>10 cuidadores</b>. Un pez, un bioma, diez lugares.</p>
        <p>Lo que cada persona hace —alimentar, limpiar, ausentarse— cambia el agua de todos. Sin humanos el bioma resiste mucho tiempo: <b>el humano es la alteración</b>.</p>
-       <p>Puedes mirar sin cuenta. Si quieres cuidar un lugar, más adelante te lo explicamos con claridad.</p>`,
-      btn('decide','Saltar','ghost')+btn('how','Cómo funciona')),
+       <p>Puedes mirar sin cuenta. Si quieres cuidar, más adelante te lo explicamos con claridad.</p>`,
+      btn('decide','Saltar','ghost')+btn('how','Siguiente')),
     how:()=>card('Cómo funciona',
       `<ul><li><b>Mira.</b> El pez sigue tu cursor y reacciona al sonido. Al tocar el agua se te ofrece activar el micrófono (opcional; el audio nunca se graba ni se envía).</li>
        <li><b>Alimenta</b> (solo cuidadores): doble clic o doble toque sobre el círculo de comida.</li>
@@ -40,8 +40,8 @@ const Onboarding=(()=>{
       const on=Net.online(), n=on?Net.freeCount():0;
       return card('¿Miras o cuidas?',
       `<p>${on?`Hay <b>${n}</b> de 10 lugares libres.`:'La red del bioma no está disponible ahora; puedes mirar en modo local.'}</p>
-       <p><b>Mirar</b> no requiere cuenta ni datos. <b>Cuidar un lugar</b> requiere iniciar sesión con Google y aceptar un compromiso.</p>${err()}`,
-      btn('watch','Solo mirar','ghost')+(on?btn('haspin','Tengo un PIN','ghost'):'')+btn('invite','Invitar a alguien','ghost')+(on&&n>0?btn('pledge','Cuidar un lugar'):'')); },
+       <p><b>MIRAR</b> no requiere cuenta ni datos. <b>CUIDAR</b> requiere iniciar sesión con Google y aceptar un compromiso.</p>${err()}`,
+      btn('watch','MIRAR','ghost')+(on?btn('haspin','Tengo un PIN','ghost'):'')+btn('invite','INVITAR','ghost')+(on&&n>0?btn('pledge','CUIDAR'):'')); },
     pledge:()=>card('Tu compromiso como cuidador',
       `<ul><li>Un lugar es un pez y su bioma. <b>Te comprometes a visitarlo, alimentarlo y limpiarlo.</b></li>
        <li>Si ya no puedes, <b>lo cedes</b> (mantener pulsado 3 s sobre el fondo): lo dejas libre o lo heredas a alguien con un PIN.</li>
@@ -56,12 +56,12 @@ const Onboarding=(()=>{
       const cell=s=>`<div class="cell ${s.st.replace(' ','-')}"><div class="h"><b>${s.i}</b> ${s.sex}</div><div class="st">${s.st}${s.st==='libre'&&s.history?' · con historia':''}</div>
         <div class="bars">${s.d.map(x=>`<i style="height:${Math.min(26,3+(x.f|0)*2)}px"></i>`).join('')}</div></div>`;
       const on=Net.online(), can=on&&!Net.isOwner()&&Net.freeCount()>0;
-      return card('Los 10 lugares',
+      return card('10 Biomas',
         on?`<div class="grid">${Net.slotsInfo().map(cell).join('')}</div>
          <p class="small">Cada barra es un día de actividad del lugar. <b>En riesgo</b>: más de 3 días sin visitas. <b>En rescate</b>: más de 7; cualquiera puede adoptarlo. <b>Reservado</b>: heredado con PIN.</p>`
         :'<p>La red del bioma no está disponible ahora.</p>',
-        btn('invite','Invitar a alguien','ghost')+(can?btn('pledge','Cuidar un lugar'):'')); },
-    invite:()=>card('Invitar a alguien',
+        btn('invite','INVITAR','ghost')+(can?btn('pledge','CUIDAR'):'')); },
+    invite:()=>card('INVITAR',
       `<p>Comparte este enlace. Quien lo abra verá la introducción, los lugares libres y podrá decidir si mira o cuida un lugar. Cuantos más cuidadores, más sano el bioma.</p>
        <input class="link" readonly value="${shareUrl()}" onfocus="this.select()">${msg?`<p class="ok">${msg}</p>`:''}`,
       btn('copyInvite','Copiar enlace')+(navigator.share?btn('nativeShare','Compartir…','ghost'):'')),
@@ -112,7 +112,7 @@ const Onboarding=(()=>{
     if(a==='pledge'){ pinMode=false; pinVal=''; return show('pledge'); }
     if(a==='copyInvite') return copy(shareUrl(),'Enlace copiado ✓','invite');
     if(a==='copyPin') return copy(shareUrl().replace('invita=1','pin='+myPin),'Enlace copiado ✓','pinout');
-    if(a==='nativeShare'){ try{ await navigator.share({title:'BETTA · bioma vivo',text:'Ven a cuidar un bioma vivo',url:shareUrl()}); }catch(e){} return; }
+    if(a==='nativeShare'){ try{ await navigator.share({title:'BETTA-BIOMA',text:'Ven a cuidar un bioma en BETTA-BIOMA',url:shareUrl()}); }catch(e){} return; }
     if(a==='cedeFree'||a==='cedePin'){
       busy=true;
       try{ const r=await Net.cede(a==='cedePin'); busy=false; if(a==='cedePin'&&r){ myPin=r; return show('pinout'); } return location.reload(); }
@@ -126,10 +126,10 @@ const Onboarding=(()=>{
     ck=Array.from(ob.querySelectorAll('input[type=checkbox]')).map(x=>x.checked); if(b) b.disabled=!ready();
   });
   if(care) care.addEventListener('click',()=>show('decide'));
-  if(foot) foot.addEventListener('click',e=>{
+  ['foot','foot2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',e=>{
     const t=e.target.closest&&e.target.closest('[data-open]'); if(!t) return;
     e.preventDefault(); prev=null; cur=''; show(t.dataset.open);
-  });
+  }); });
   function start(r){
     const m=q.match(/[?&]pin=([A-Za-z0-9-]+)/);
     if(r.role!=='owner' && m){ pinMode=true; pinVal=normPin(m[1]); show('pledge'); }
