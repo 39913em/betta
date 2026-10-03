@@ -7,13 +7,19 @@ function dropPellet(){
   if(!Net.canFeed()) return;
   pellets.push(new Pellet(foodCircle.x, foodCircle.y - 4*dpr));
   Persist.onFeed();
+  Care.onFeed();
   for(let i=0;i<3;i++) setTimeout(()=>bubbleSnd(0.7,1.0+Math.random()*0.4),i*60);
 }
 function overFood(p,k){ return Math.hypot(p.x-foodCircle.x,p.y-foodCircle.y) < foodCircle.r*k; }
 
 canvas.addEventListener('mousemove', e=>{ mouse=canvasPos(e.clientX,e.clientY); });
 canvas.addEventListener('mouseleave', ()=>{ mouse=null; });
-canvas.addEventListener('click', ()=>{ initAudio(); });
+canvas.addEventListener('click', e=>{
+  initAudio();
+  if(performance.now()-lastScrub<300) return;
+  const p=canvasPos(e.clientX,e.clientY);
+  if(p.y<H*WATER_FLOOR_FRAC) Care.tap();
+});
 canvas.addEventListener('dblclick', e=>{ if(overFood(canvasPos(e.clientX,e.clientY),1.4)) dropPellet(); });
 
 let lastTapT=0, lastTapX=0, lastTapY=0;
@@ -39,7 +45,8 @@ canvas.addEventListener('touchstart', e=>holdStart(canvasPos(e.touches[0].client
 ['mouseup','mouseleave','touchend','touchcancel','touchmove'].forEach(ev=>canvas.addEventListener(ev,holdCancel,{passive:true}));
 
 let pressed=false;
-function scrubAt(p){ if(pressed && Decay.scrub(p.x,p.y)) holdCancel(); }
+let lastScrub=0;
+function scrubAt(p){ if(pressed && Decay.scrub(p.x,p.y)){ holdCancel(); lastScrub=performance.now(); } }
 canvas.addEventListener('mousedown',()=>{ pressed=true; });
 canvas.addEventListener('mousemove',e=>scrubAt(canvasPos(e.clientX,e.clientY)));
 canvas.addEventListener('touchstart',()=>{ pressed=true; },{passive:true});

@@ -90,6 +90,22 @@ Configuración (una sola vez, proyecto `bettea-d4b04`):
 
 Los textos viven en `src/js/legal.js` y se muestran dentro de la ventana flotante (un solo lugar para editarlos). Responsable: 39913 · eddmatography@protonmail.ch · Ciudad de México. Conviene que un abogado los revise antes de una publicación formal.
 
+## Cuidado, vínculo y estadísticas
+
+Cada pez tiene nombre, **estrés** y **vínculo** (0 a 100). El estado del bioma (Óptimo, Estable, Turbio, Contaminado, Crítico) sale de su suciedad y del agua compartida. La **ficha** de cada bioma se abre desde *10 Biomas*; en el propio, desde *Mi bioma*, y permite renombrar al pez y actuar.
+
+| Acción | Efecto | Costo |
+|---|---|---|
+| Limpiar arrastrando | Baja la suciedad | Pequeño estrés |
+| Cambio de agua | Limpia mucho | Estrés alto |
+| Tratamiento químico | Limpia todo | Estrés y pérdida de vínculo |
+| Artemia viva | Sube el vínculo | Ensucia el fondo |
+| Golpear el cristal | El pez reacciona | Estrés y pérdida de vínculo |
+
+Cada cuidador acumula un registro de conducta (Cuidador, Pragmático, Oportunista, Depredador). Nadie puede alterar el bioma de otra persona: solo se puede ver su ficha.
+
+El sonido de pantano (lluvia, corriente, carrizo, ranas, grillos, moscas) se genera en el navegador y cambia con el estado del bioma. Se silencia desde *Sonido* abajo a la izquierda.
+
 ## Despliegue en GitHub Pages
 
 Incluye un workflow (`.github/workflows/pages.yml`). En el repositorio: *Settings → Pages → Source: GitHub Actions*.

@@ -1,4 +1,3 @@
-
 const Net = (()=>{
   const N=10, ABANDON_MS=7*864e5, FEED_MS=864e5, BEAT_MS=3e5, NOCLAIM_KEY='betta.noClaimUntil';
   let claimErr='', slotsRef=null, slots={}, uid=null, mySlot=null, role='local', online=false;
@@ -7,7 +6,7 @@ const Net = (()=>{
   const now=()=>Date.now();
   const sid=i=>'s'+i;
   const abandoned=s=>s && s.owner && now()-s.t>ABANDON_MS;
-  const isFree=s=>!s || (!s.owner && !(s.res>now())) || abandoned(s);   /* reservado por PIN = no libre */
+  const isFree=s=>!s || (!s.owner && !(s.res>now())) || abandoned(s);
   const timeout=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),ms))]);
 
   async function init(){
@@ -31,7 +30,7 @@ const Net = (()=>{
     recompute();
     return { role, slot:mySlot, state: mySlot?slots[sid(mySlot)]:null };
   }
- 
+
   async function takeSlot(pin){
     if(!online) return {ok:false,reason:'Sin conexión con la red del bioma.'};
     if(now()<+(localStorage.getItem(NOCLAIM_KEY)||0)) return {ok:false,reason:'Cediste un lugar hace poco. Podrás tomar otro pasadas 24 horas.'};
@@ -73,9 +72,9 @@ const Net = (()=>{
   async function claim(i,pin){
     try{
       const r=await slotsRef.child(sid(i)).transaction(cur=>{
-        if(cur && !isFree(cur) && !(pin && !cur.owner)) return;     /* alguien ganó (o está reservado sin tu PIN) */
+        if(cur && !isFree(cur) && !(pin && !cur.owner)) return;
         const base=cur||{ x:Math.random()<.5?0:1, n:0, f:0, d:[], c:now() };
-        const out=Object.assign({},base,{ owner:uid, t:now() }); delete out.res; if(pin) out.pin=pin;
+        const out=Object.assign({},base,{ owner:uid, t:now() }); delete out.res; if(pin) out.pin=pin; out.b=Math.round((base.b||0)*.25); out.g=0; out.w=0;
         return out;
       });
       if(r.committed && r.snapshot.val().owner===uid){ slots[sid(i)]=r.snapshot.val(); return true; }
@@ -85,7 +84,7 @@ const Net = (()=>{
 
   function record(){
     const s=Persist.state(), last=s.days[s.days.length-1]||{f:0};
-    return { owner:uid, t:now(), f:last.f|0, n:s.feeds|0, x:s.sex==='female'?1:0, d:s.days, c:s.c };
+    return { owner:uid, t:now(), f:last.f|0, n:s.feeds|0, x:s.sex==='female'?1:0, d:s.days, c:s.c, k:s.name||'', s:Math.round(s.stress), b:Math.round(s.bond), g:s.good|0, w:s.bad|0 };
   }
   function publish(force){
     if(role!=='owner'||!slotsRef) { local(); return; }
@@ -98,14 +97,14 @@ const Net = (()=>{
   function local(){ recompute(); }
 
   const genPin=()=>{ const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789', r=crypto.getRandomValues(new Uint8Array(6)); return Array.from(r,x=>A[x%A.length]).join(''); };
-  
+
   async function cede(usePin){
     if(role!=='owner') return null;
     const s=Persist.state(); let pin=null;
     if(usePin){ pin=genPin(); await firebase.database().ref('pins/'+pin).set({ s:sid(mySlot), t:now() }); }
     const upd={ owner:null, t:now(), d:s.days, n:s.feeds, c:s.c }; if(pin) upd.res=now()+3*864e5;
     await slotsRef.child(sid(mySlot)).update(upd);
-    localStorage.setItem(NOCLAIM_KEY, String(now()+864e5));   /* 24 h sin retomar */
+    localStorage.setItem(NOCLAIM_KEY, String(now()+864e5));
     mySlot=null; role='spectator';
     return pin||true;
   }
@@ -134,7 +133,7 @@ const Net = (()=>{
     return Array.from({length:N},(_,k)=>{
       const i=k+1, s=slots[sid(i)], age=s?(now()-s.t)/864e5:0;
       const st=s&&!s.owner&&s.res>now()?'reservado':!s||!s.owner?'libre':s.owner===uid?'tuyo':age>7?'en rescate':age>3?'en riesgo':'cuidado';
-      return { i, st, sex:s?(s.x===1?'♀':'♂'):'', d:(s&&s.d||[]).filter(Boolean).slice(-30), history:!!(s&&s.n) };
+      return { i, st, sex:s?(s.x===1?'♀':'♂'):'', d:(s&&s.d||[]).filter(Boolean).slice(-30), history:!!(s&&s.n), owned:!!(s&&s.owner), name:s&&s.k||'', stress:s&&s.s!=null?s.s:null, bond:s&&s.b!=null?s.b:null, good:s?s.g|0:0, bad:s?s.w|0:0, dirt:s?Math.max(0,Math.min(1,(now()-(s.c||s.t))/(6*864e5))):0, t:s?s.t:0 };
     });
   }
   function viewDirt(){
@@ -143,6 +142,6 @@ const Net = (()=>{
       const d=Math.max(0,Math.min(1,(now()-(s.c||s.t))/(6*864e5))); if(m===null||d>m) m=d; }
     return m;
   }
-  return { init, viewDirt, slotsInfo, waterLevel:()=>water, takeSlot, freeCount, online:()=>online, publish, cede, drawWater,
+  return { init, viewDirt, slot:()=>mySlot, slotsInfo, waterLevel:()=>water, takeSlot, freeCount, online:()=>online, publish, cede, drawWater,
     canFeed:()=>role!=='spectator', isOwner:()=>role==='owner', role:()=>role };
 })();

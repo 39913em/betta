@@ -5,25 +5,66 @@
       "$sid": {
         ".write": "auth != null && $sid.matches(/^s([1-9]|10)$/) && (data.child('owner').val() === auth.uid || (newData.child('owner').val() === auth.uid && (!data.child('owner').exists() || data.child('t').val() < now - 604800000) && (!data.child('res').exists() || data.child('res').val() < now || root.child('pins').child(newData.child('pin').val()).child('s').val() === $sid)))",
         ".validate": "newData.hasChildren(['t','x'])",
-        "owner": { ".validate": "newData.isString()" },
-        "t": { ".validate": "newData.isNumber() && newData.val() <= now + 60000" },
-        "f": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 10000" },
-        "n": { ".validate": "newData.isNumber() && newData.val() >= 0" },
-        "x": { ".validate": "newData.val() === 0 || newData.val() === 1" },
-        "d": { ".validate": true },
-        "c": { ".validate": "newData.isNumber()" },
-        "res": { ".validate": "newData.isNumber()" },
-        "pin": { ".validate": "newData.isString() && newData.val().matches(/^[A-Z2-9]{6}$/)" },
-        "$other": { ".validate": false }
+        "owner": {
+          ".validate": "newData.isString()"
+        },
+        "t": {
+          ".validate": "newData.isNumber() && newData.val() <= now + 60000"
+        },
+        "f": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 10000"
+        },
+        "n": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "x": {
+          ".validate": "newData.val() === 0 || newData.val() === 1"
+        },
+        "d": {
+          ".validate": true
+        },
+        "c": {
+          ".validate": "newData.isNumber()"
+        },
+        "res": {
+          ".validate": "newData.isNumber()"
+        },
+        "pin": {
+          ".validate": "newData.isString() && newData.val().matches(/^[A-Z2-9]{6}$/)"
+        },
+        "k": {
+          ".validate": "newData.isString() && newData.val().length <= 16"
+        },
+        "s": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
+        },
+        "b": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100"
+        },
+        "g": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "w": {
+          ".validate": "newData.isNumber() && newData.val() >= 0"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     },
     "pins": {
       "$pin": {
         ".read": "auth != null",
         ".write": "auth != null && $pin.matches(/^[A-Z2-9]{6}$/) && root.child('slots').child(data.exists() ? data.child('s').val() : newData.child('s').val()).child('owner').val() === auth.uid",
-        "s": { ".validate": "newData.isString() && newData.val().matches(/^s([1-9]|10)$/)" },
-        "t": { ".validate": "newData.isNumber()" },
-        "$other": { ".validate": false }
+        "s": {
+          ".validate": "newData.isString() && newData.val().matches(/^s([1-9]|10)$/)"
+        },
+        "t": {
+          ".validate": "newData.isNumber()"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     }
   }

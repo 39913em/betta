@@ -2,7 +2,7 @@
 const Onboarding=(()=>{
   const ob=document.getElementById('ob'), care=document.getElementById('care');
   const SEEN='betta.introSeen', TABS=[['','Acerca de'],['how','Cómo funciona'],['gallery','10 Biomas'],['terms','Términos'],['priv','Privacidad']];
-  const MAIN=new Set(['about','how','gallery','invite','terms','priv']);
+  const MAIN=new Set(['about','how','gallery','invite','terms','priv','ficha']);
   const q=typeof location!=='undefined'?location.search:'';
   let busy=false, msg='', last={}, cur='', prev=null, ck=[false,false,false], pinMode=false, pinVal='', myPin='';
   const normPin=v=>String(v||'').toUpperCase().replace(/[^A-Z2-9]/g,'').slice(0,6);
@@ -10,9 +10,14 @@ const Onboarding=(()=>{
   const shareUrl=()=>location.origin+location.pathname+'?invita=1';
   const ready=()=>ck.every(Boolean)&&(!pinMode||normPin(pinVal).length===6);
   const btn=(a,t,c='')=>`<button data-a="${a}" class="${c}">${t}</button>`;
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const left=ms=>ms>=3600e3?Math.ceil(ms/3600e3)+' h':Math.ceil(ms/60e3)+' min';
+  const ago=ts=>{ const d=(Date.now()-ts)/864e5; return !ts?'—':d<1?'hoy':'hace '+Math.floor(d)+' d'; };
+  const meter=(l,x,c='')=>x==null?'':`<div class="meter ${c}"><span>${l}</span><div><i style="width:${Math.round(x)}%"></i></div><b>${Math.round(x)}</b></div>`;
+  let fichaArg='';
   const err=()=>msg?`<p class="err">${msg}</p>`:'';
   const card=(h,body,btns,nav=true)=>{
-    const act=cur;
+    const act=cur.split(':')[0]==='ficha'?'gallery':cur;
     return `<div class="card"><h1>${h}</h1><div class="body">${body}</div><div class="btns">${btns}</div>`+
       (nav?`<div class="tabs">${TABS.map(([k,t])=>`<button data-a="${k}" class="tab${act===k?' on':''}">${t}</button>`).join('')}<button data-a="close" class="tab x">Cerrar</button></div>`:'')+`</div>`;
   };
@@ -47,7 +52,7 @@ const Onboarding=(()=>{
        <label><input type="checkbox" ${ck[2]?'checked':''}> Asumo el compromiso de cuidar mi lugar o cederlo.</label>${err()}`,
       btn('decide','Atrás','ghost')+`<button data-a="accept" ${ready()?'':'disabled'}>Aceptar y continuar con Google</button>`),
     gallery:()=>{
-      const cell=s=>`<div class="cell ${s.st.replace(' ','-')}"><div class="h"><b>${s.i}</b> ${s.sex}</div><div class="st">${s.st}${s.st==='libre'&&s.history?' · con historia':''}</div>
+      const cell=s=>`<div class="cell ${s.st.replace(' ','-')}" data-a="ficha:${s.i}"><div class="h"><b>${s.i}</b> ${s.sex}</div><div class="st">${s.st}${s.st==='libre'&&s.history?' · con historia':''}</div>
         <div class="bars">${s.d.map(x=>`<i style="height:${Math.min(26,3+(x.f|0)*2)}px"></i>`).join('')}</div></div>`;
       const on=Net.online(), can=on&&!Net.isOwner()&&Net.freeCount()>0;
       return card('10 Biomas',
@@ -68,22 +73,43 @@ const Onboarding=(()=>{
       `<p class="pinbig">${fmtPin(myPin)}</p>
        <p>Compártelo con quien recibirá tu lugar. Vale 3 días. Quien lo reciba debe aceptar términos y privacidad e ingresar este PIN. Ya no eres cuidador de este lugar.</p>${msg?`<p class="ok">${msg}</p>`:''}`,
       btn('copyPin','Copiar enlace con PIN')+btn('reload','Listo'),false),
+    ficha:()=>{
+      const i=fichaArg==='own'?Net.slot():+fichaArg;
+      const info=Net.online()?Net.slotsInfo()[i-1]:null;
+      if(!info) return card('Bioma',`<p>La red del bioma no está disponible ahora.</p>`,'');
+      const own=Net.isOwner()&&i===Net.slot();
+      if(!info.owned&&!own) return card(`Bioma ${i}`,`<p>Este bioma está ${info.st}. Nadie lo cuida ahora.</p>`,btn('gallery','Volver a 10 Biomas','ghost'));
+      const v=own?Care.snapshot():{name:info.name,stress:info.stress,bond:info.bond,good:info.good,bad:info.bad,dirt:info.dirt,sex:info.sex,t:info.t};
+      const p=Care.pollution(v.dirt);
+      const rows=`${meter('Estrés',v.stress,'stress')}${meter('Vínculo',v.bond,'bond')}${meter('Contaminación',p*100,'pollution')}
+        <p class="facts"><span>Estado del bioma</span><b>${Care.biomeLabel(p)}</b></p>
+        <p class="facts"><span>Conducta del cuidador</span><b>${Care.conductLabel(v.good,v.bad)}</b></p>
+        <p class="facts"><span>Última visita</span><b>${ago(v.t)}</b></p>`;
+      const mine=own?`<label class="pinf">Nombre del pez <input id="fname" maxlength="16" autocomplete="off" value="${esc(v.name)}"></label>
+        <h2>Acciones</h2><p class="small">Todo tiene costo.</p>
+        ${Care.actions().map(a=>`<div class="act"><div><b>${a.label}</b><small>${a.hint}</small></div>${a.left>0?`<em>${left(a.left)}</em>`:btn('act:'+a.key,'Hacer','ghost')}</div>`).join('')}`:'';
+      return card(`${esc(v.name)||'Sin nombre'} ${v.sex} · Bioma ${i}`,rows+mine+(msg?`<p class="ok">${esc(msg)}</p>`:''),own?btn('saveName','Guardar nombre'):'');
+    },
     working:()=>card('Un momento…',`<p>${msg}</p>`,'',false),
     done:()=>card(`Tu lugar es el ${last.slot}`,
-      `<p>Tu pez ya es tuyo. Aliméntalo con doble clic sobre el círculo de comida, limpia el fondo arrastrando y vuelve a visitarlo.</p>
-       <p>Si algún día no puedes seguir, cede tu lugar: mantén pulsado 3 s sobre el fondo.</p>`,
+      `<p>Tu pez ya es tuyo. Aliméntalo con doble clic sobre el círculo de comida y limpia el fondo arrastrando.</p>
+       <label class="pinf">Nombre de tu pez <input id="fname" maxlength="16" autocomplete="off" placeholder="Ponle nombre"></label>`,
       btn('enter','Entrar al bioma'))
   };
   function show(n){
-    if(MAIN.has(n)&&cur&&!MAIN.has(cur)) prev=cur;
+    const name=n.split(':')[0];
+    fichaArg=n.split(':')[1]||'';
+    if(MAIN.has(name)&&cur&&!MAIN.has(cur.split(':')[0])) prev=cur;
     cur=n;
-    ob.innerHTML=LEGAL[n]?card(LEGAL[n].title,LEGAL[n].html,''):steps[n]();
+    ob.innerHTML=LEGAL[name]?card(LEGAL[name].title,LEGAL[name].html,''):steps[name]();
     ob.style.display='flex';
   }
   function hide(){ cur=''; prev=null; ob.style.display='none'; ob.innerHTML=''; try{localStorage.setItem(SEEN,'1');}catch(e){} refresh(); }
   function refresh(){
     if(!care) return;
     care.style.display=(Net.online()&&!Net.isOwner()&&Net.freeCount()>0&&ob.style.display==='none')?'block':'none';
+    const mine=document.getElementById('mine');
+    if(mine) mine.style.display=Net.isOwner()?'inline':'none';
   }
   async function copy(text,okMsg,step){
     try{ await navigator.clipboard.writeText(text); msg=okMsg; }catch(e){ msg='Selecciona el enlace y cópialo manualmente.'; }
@@ -99,6 +125,9 @@ const Onboarding=(()=>{
     e.preventDefault();
     const a=t.dataset.a; const keepMsg=(a==='copyInvite'||a==='copyPin'); if(!keepMsg) msg='';
     if(a==='close'){ const p=prev; prev=null; return p?show(p):hide(); }
+    if(a==='enter'){ const f=ob.querySelector('#fname'); if(f&&f.value.trim()) Care.setName(f.value); }
+    if(a==='saveName'){ const f=ob.querySelector('#fname'); Care.setName(f?f.value:''); msg='Nombre guardado.'; return show(cur); }
+    if(a.startsWith('act:')){ msg=Care.act(a.slice(4)).msg; return show(cur); }
     if(a==='watch'||a==='enter'||a==='cancel') return hide();
     if(a==='reload') return location.reload();
     if(a==='accept') return accept();
@@ -117,7 +146,7 @@ const Onboarding=(()=>{
   ob.addEventListener('input',()=>{
     const p=ob.querySelector('#pin'); if(p) pinVal=normPin(p.value);
     const b=ob.querySelector('[data-a=accept]');
-    ck=Array.from(ob.querySelectorAll('input[type=checkbox]')).map(x=>x.checked); if(b) b.disabled=!ready();
+    const boxes=Array.from(ob.querySelectorAll('input[type=checkbox]')); if(boxes.length===3) ck=boxes.map(x=>x.checked); if(b) b.disabled=!ready();
   });
   if(care) care.addEventListener('click',()=>show('decide'));
   ['foot','foot2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.addEventListener('click',e=>{

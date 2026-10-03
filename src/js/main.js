@@ -4,6 +4,7 @@ let mouse=null;
 
 function start(){
   Persist.load();
+  Care.settle();
   resize();
   initFoodHint();
   const sex=Persist.sex();
@@ -14,6 +15,7 @@ start();
 function becomeOwner(state){
   const before=Persist.state().sex;
   Persist.adopt(state);
+  Care.settle();
   if(Persist.state().sex!==before) betta=new Betta(Persist.state().sex,{variant:'original',isFounder:true,isAdult:true,depthPlane:2});
   Net.publish(true);
 }
@@ -30,6 +32,7 @@ function loop(now){
   const dt=Math.min((now-last)/1000,.033);last=now;const t=now/1000;
 
   readMic();
+  Care.tick(dt);
 
   ctx.drawImage(swampCanvas,0,0);
 

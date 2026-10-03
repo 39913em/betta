@@ -9,6 +9,7 @@ async function initAudio(){
   const o2=actx.createOscillator(); o2.type='sine'; o2.frequency.value=54;
   const og=actx.createGain(); og.gain.value=0.09;
   o1.connect(og); o2.connect(og); og.connect(master); o1.start(); o2.start();
+  Ambience.start();
   master.gain.linearRampToValueAtTime(0, actx.currentTime);
   master.gain.linearRampToValueAtTime(0.4, actx.currentTime+4);
   try{

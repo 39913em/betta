@@ -23,27 +23,29 @@
 <meta name="twitter:image" content="https://39913em.github.io/betta/preview.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23020503%27/%3E%3Cellipse cx=%2714%27 cy=%2716%27 rx=%279%27 ry=%275%27 fill=%27%23c0392b%27/%3E%3Cpath d=%27M22 16l7-6v12z%27 fill=%27%23e74c3c%27/%3E%3C/svg%3E">
 <link rel="stylesheet" href="src/css/style.css">
-
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#020503">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BETTA-BIOMA">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
-
 <body>
 <canvas id="c"></canvas>
 <div id="ob"></div>
 <button id="care">CUIDAR</button>
-<nav id="foot2"><a href="#" data-open="how">Cómo funciona</a></nav>
+<nav id="foot2"><a href="#" data-open="how">Cómo funciona</a><span id="mine" style="display:none"> · <a href="#" data-open="ficha:own">Mi bioma</a></span></nav>
 <nav id="foot"><a href="#" data-open="about">Acerca de</a> · <a href="#" data-open="gallery">10 Biomas</a> · <a href="#" data-open="terms">Términos</a> · <a href="#" data-open="priv">Privacidad</a></nav>
-
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="src/js/config.js"></script>
 <script src="src/js/core.js"></script>
 <script src="src/js/audio.js"></script>
+<script src="src/js/ambience.js"></script>
 <script src="src/js/persist.js"></script>
 <script src="src/js/network.js"></script>
+<script src="src/js/care.js"></script>
 <script src="src/js/swamp.js"></script>
 <script src="src/js/fins.js"></script>
 <script src="src/js/artemia.js"></script>
@@ -56,16 +58,6 @@
 <script src="src/js/onboarding.js"></script>
 <script src="src/js/main.js"></script>
 <script src="src/js/input.js"></script>
-
-<script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('SW registrado:', reg.scope))
-          .catch(err => console.error('Error SW:', err));
-      });
-    }
-  </script>
-
+<script src="src/js/pwa.js"></script>
 </body>
 </html>

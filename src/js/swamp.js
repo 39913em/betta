@@ -1,11 +1,8 @@
-
 let swampCanvas, plants=[], plantsFg=[], motes=[];
 function buildSwamp(){
   swampCanvas=document.createElement('canvas');
   swampCanvas.width=W; swampCanvas.height=H;
   const c=swampCanvas.getContext('2d');
-
- 
 
   const water=c.createLinearGradient(0,0,0,H);
   water.addColorStop(0,'#101a18');
@@ -43,7 +40,6 @@ function buildSwamp(){
     c.stroke();
   }
 
- 
   for(let i=0;i<42;i++){
     const x=W*(.01+Math.random()*.98);
     const base=H*(.72+Math.random()*.22);
@@ -89,7 +85,6 @@ function buildSwamp(){
   c.fillStyle=farMist;
   c.fillRect(0,0,W,H*.78);
 
-  
   function branch(points,width,depth,seed){
     const nSegs=points.length-1;
     const perSeg=14;
@@ -288,7 +283,6 @@ function buildSwamp(){
   c.fillStyle=shadow;
   c.fillRect(0,0,W,H);
 
- 
   const floorY=H*0.91;
 
   const sg=c.createLinearGradient(0,floorY-40*dpr,0,H);
@@ -375,7 +369,6 @@ function buildSwamp(){
   c.fillStyle=contact;
   c.fillRect(0,floorY-8*dpr,W,14*dpr);
 
- 
   for(let i=0;i<140;i++){
     const x=W*(0.01+Math.random()*0.98);
     const y=H*(0.90+Math.random()*0.10);
@@ -409,7 +402,6 @@ function buildSwamp(){
     }
   }
 
- 
   const rightSpecies = ['vallis','sagitt','stem','vallis','sagitt','vallis','vallis','sagitt'];
 
   for(let i=0;i<220;i++){
@@ -493,7 +485,6 @@ function buildSwamp(){
     }
   }
 
- 
   const anubiasAnchors=[
     {x:.48,y:.82},{x:.46,y:.72},{x:.44,y:.62},
     {x:.42,y:.52},{x:.40,y:.44},{x:.44,y:.36},
@@ -594,7 +585,6 @@ function buildSwamp(){
     }
   }
 
- 
   const mossZones=[
     {x0:W*0.10,y0:H*0.55,x1:W*0.90,y1:H*0.85,density:260},
     {x0:W*0.28,y0:H*0.32,x1:W*0.72,y1:H*0.55,density:120},
@@ -752,7 +742,6 @@ function buildSwamp(){
     }
   }
 
-  /* glass edge / waterline */
   c.fillStyle='rgba(235,242,235,0.15)';
   c.fillRect(0,0,W,2*dpr);
 
