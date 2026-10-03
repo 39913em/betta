@@ -178,7 +178,7 @@ const Ambience=(()=>{
     link=document.createElement('a');
     link.href='#';
     link.addEventListener('click',e=>{e.preventDefault();toggle();});
-    nav.append(' · ',link);
+    nav.append(link);
     label();
   }
 

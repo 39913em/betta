@@ -58,7 +58,7 @@ class Betta{
     const yMin=H*SWIM_BAND.topFrac+45*dpr, yMax=H*WATER_FLOOR_FRAC-this.bodyLen*.45;
     this.x=opts.x!==undefined?opts.x:W*.5;
     this.y=opts.y!==undefined?opts.y:(yMin+yMax)*.5;
-    this.vx=0;this.vy=0;this.angle=Math.random()*Math.PI*2;this.time=0;this.face=1;this.faceS=1;this.pitch=0;this.bend=0;this.turn=0;
+    this.vx=0;this.vy=0;this.angle=0;this.time=0;this.face=1;this.faceS=1;this.pitch=0;this.bend=0;this.turn=0;this.flipT=1;this.flipDir=1;this.flipCool=0;
     this.opacity=this.isAdult?1:.7;
 
     this.depthPlane=opts.depthPlane||2;
@@ -188,9 +188,22 @@ class Betta{
     this.easeTo(tg,3.5,dt);
 
     if(this.state!=='display'){
-      const dx=this.target.x-this.x,dy=this.target.y-this.y,want=Math.atan2(dy,dx),diff=Math.atan2(Math.sin(want-this.angle),Math.cos(want-this.angle));
-      const spF=Math.min(1,Math.hypot(this.vx,this.vy)*40);this.turn=diff;this.angle+=diff*this.cur.turnRate*(.5+.5*spF);this.vx+=Math.cos(this.angle)*this.cur.thrust;this.vy+=Math.sin(this.angle)*this.cur.thrust;
+      const dx=this.target.x-this.x,dy=this.target.y-this.y;
+      this.flipCool-=dt;
+      if(dx*this.face<-this.bodyLen*.9&&this.flipT>=1&&this.flipCool<=0){this.flipT=0;this.flipDir=-this.face;this.flipCool=2.2;}
+      const flipping=this.flipT<1,spF=Math.min(1,Math.hypot(this.vx,this.vy)*40);
+      const pitchWant=Math.max(-.5,Math.min(.5,Math.atan2(dy,Math.abs(dx)+8*dpr)*.8));
+      this.turn=flipping?0:pitchWant-this.pitch;
+      this.pitch+=(flipping?-this.pitch*.12:this.turn*this.cur.turnRate*(.6+.4*spF))*dt*60;
+      const power=flipping?.12:1;
+      this.vx+=this.face*Math.cos(this.pitch)*this.cur.thrust*power;
+      this.vy+=Math.sin(this.pitch)*this.cur.thrust*power;
     }
+    if(this.flipT<1){
+      this.flipT=Math.min(1,this.flipT+dt/.55);
+      if(this.flipT>=.5&&this.face!==this.flipDir)this.face=this.flipDir;
+    }
+    this.angle=this.face>0?this.pitch:Math.PI-this.pitch;
 
     const speed=Math.hypot(this.vx,this.vy),drag=.020+speed*.020;this.vx*=1-drag;this.vy*=1-drag;const MAXV=(this.isAdult?1.8:1.2)*(1-0.4*Net.waterLevel()-0.25*Persist.dirt());if(speed>MAXV){this.vx*=MAXV/speed;this.vy*=MAXV/speed;}
     this.x+=this.vx*dpr*60*dt;this.y+=this.vy*dpr*60*dt;
@@ -200,22 +213,20 @@ class Betta{
 
     const wv={freq:this.cur.waveFreq,amp:this.cur.waveAmp,wavelength:this.cur.wavelength};let curvFn=null;
     if(this.state==='burst'){const tN=this.sStartT/this.sStartDur;if(tN<1)curvFn=(s,t)=>{const env=Math.sin(tN*Math.PI),lobe=Math.sin(s*Math.PI),sign=tN<.5?this.sStartDir:-this.sStartDir;return sign*env*lobe*.10;};}
-    const cosA=Math.cos(this.angle);
-    if(cosA<-.28)this.face=-1;else if(cosA>.28)this.face=1;
-    this.faceS+=(this.face-this.faceS)*Math.min(1,dt*9);
-    const mirrored=this.face>0?this.angle:Math.PI-this.angle;
-    const pitchRaw=Math.max(-1,Math.min(1,Math.atan2(Math.sin(mirrored),Math.cos(mirrored))));
-    this.pitch+=(pitchRaw-this.pitch)*Math.min(1,dt*6);
     const swimPower=Math.min(1,Math.hypot(this.vx,this.vy)*40);
-    wv.amp*=.7+.8*swimPower;
-    wv.freq*=.8+.6*swimPower;
-    const bendTarget=-Math.max(-1,Math.min(1,this.turn*this.face))*.035;
-    this.bend+=(bendTarget-this.bend)*Math.min(1,dt*5);
-    const baseCurve=curvFn,bendK=this.bend;
-    curvFn=(s,t)=>(baseCurve?baseCurve(s,t):0)+bendK*Math.sin(s*Math.PI);
-    this.spine.update(this.x,this.y,this.pitch,wv,this.time,curvFn);
+    wv.amp*=.55+.9*swimPower;
+    wv.freq*=.7+.7*swimPower;
+    const turnBend=-Math.max(-1,Math.min(1,this.turn*2.2))*.11;
+    const flipBend=this.flipT<1?-Math.sin(this.flipT*Math.PI)*.24:0;
+    this.bend+=(turnBend+flipBend-this.bend)*Math.min(1,dt*7);
+    wv.bend=this.bend;
+    if(this.flipT<1){
+      const p=this.flipT,e=p*p*(3-2*p),xs=-this.flipDir+2*this.flipDir*e;
+      this.faceS=(xs<0?-1:1)*(.3+.7*Math.abs(xs));
+    }else this.faceS=this.face;
+    this.spine.update(0,0,0,wv,this.time,curvFn);
 
-    let flow={x:-this.vx*this.face*1.5,y:-this.vy*1.5};flow.x=Math.max(-2.5,Math.min(2.5,flow.x));flow.y=Math.max(-2.5,Math.min(2.5,flow.y));
+    const sp=Math.hypot(this.vx,this.vy);let flow={x:-sp*1.5,y:-this.turn*sp*3};flow.x=Math.max(-2.5,Math.min(2.5,flow.x));flow.y=Math.max(-2.5,Math.min(2.5,flow.y));
     const peduncle=this.spine.pts[this.spine.n-1],midBody=this.spine.pts[7],midBody2=this.spine.pts[11],pectBase=this.spine.pts[3];
     const vs=this.veilScale*(1-.35*Care.stress());this.caudal.lenScale=vs;this.caudal.fanScale=vs*.9+.1;this.anal.lenScale=.5+.5*vs;this.dorsal.lenScale=.5+.5*vs;
     this.caudal.update(peduncle.x,peduncle.y,peduncle.a+Math.PI,flow,{targetExt:this.cur.extCaudal,waveAmp:.22+this.cur.waveAmp*.3,waveFreq:.7+this.cur.waveFreq*.5,dragK:.055,spread:1,time:this.time,dt});
@@ -224,7 +235,7 @@ class Betta{
     const pectPh=this.time*this.cur.pectSpeed,pAngL=pectBase.a+Math.PI*.55+Math.sin(pectPh)*.55,pAngR=pectBase.a-Math.PI*.55+Math.sin(pectPh+Math.PI)*.55;
     this.pectL.update(pectBase.x,pectBase.y-6*dpr,pAngL,flow,{targetExt:this.cur.extPectL,waveAmp:.16,waveFreq:this.cur.pectSpeed*.9,dragK:.06,spread:.6,time:this.time,dt});
     this.pectR.update(pectBase.x,pectBase.y+6*dpr,pAngR,flow,{targetExt:this.cur.extPectR,waveAmp:.16,waveFreq:this.cur.pectSpeed*.9,dragK:.06,spread:.6,time:this.time,dt});
-    const vb=this.spine.pts[5],vAngL=this.pitch+Math.PI/2+.55+Math.sin(this.time*.9)*.10,vAngR=this.pitch+Math.PI/2-.55+Math.sin(this.time*.9+.4)*.10;
+    const vb=this.spine.pts[5],vAngL=Math.PI/2+.55+Math.sin(this.time*.9)*.10,vAngR=Math.PI/2-.55+Math.sin(this.time*.9+.4)*.10;
     this.ventralL.update(vb.x,vb.y+3*dpr,vAngL,{x:flow.x*.2,y:flow.y*.2+.4},{targetExt:this.cur.extVentral,waveAmp:.055,waveFreq:.55,dragK:.025,spread:.4,time:this.time,dt});
     this.ventralR.update(vb.x,vb.y+4*dpr,vAngR,{x:flow.x*.2,y:flow.y*.2+.4},{targetExt:this.cur.extVentral,waveAmp:.055,waveFreq:.55,dragK:.025,spread:.4,time:this.time,dt});
 
@@ -239,7 +250,7 @@ class Betta{
     ctx.globalAlpha=op*farFade;
     ctx.translate(this.x,this.y);ctx.scale(depth,depth);ctx.translate(-this.x,-this.y);
     ctx.translate(0,Math.sin(this.time*1.3)*1.4*dpr);
-    ctx.translate(this.x,0);ctx.scale(this.faceS,1);ctx.translate(-this.x,0);
+    ctx.translate(this.x,this.y);ctx.scale(this.faceS,1);ctx.rotate(this.pitch);
 
     this.ventralL.draw(pal.ventral.edge,pal.ventral.mem,.9,pal.ventral.hi);
     this.ventralR.draw(pal.ventral.edge,pal.ventral.mem,.9,pal.ventral.hi);

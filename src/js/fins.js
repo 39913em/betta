@@ -6,16 +6,19 @@ class Spine{
     for(let i=0;i<n;i++) this.pts.push({x:0,y:0,a:0});
   }
   update(x,y,headAngle,wave,time,curvFn){
-    const seg=this.len/(this.n-1);
-    this.pts[0].x=x; this.pts[0].y=y; this.pts[0].a=headAngle;
-    for(let i=1;i<this.n;i++){
-      const s=i/(this.n-1);
-      const env=0.02+0.98*Math.pow(s,2.0);
-      let k=wave.amp*env*Math.sin(2*Math.PI*(wave.freq*time - s*wave.wavelength));
-      if(curvFn) k+=curvFn(s,time);
-      this.pts[i].a=this.pts[i-1].a+k;
-      this.pts[i].x=this.pts[i-1].x-Math.cos(this.pts[i-1].a)*seg;
-      this.pts[i].y=this.pts[i-1].y-Math.sin(this.pts[i-1].a)*seg;
+    const n=this.n,len=this.len,cos=Math.cos(headAngle),sin=Math.sin(headAngle);
+    const amp=wave.amp*len*.55,bend=wave.bend||0;
+    for(let i=0;i<n;i++){
+      const s=i/(n-1),d=s*len;
+      let off=amp*(.03+.97*Math.pow(s,1.8))*Math.sin(2*Math.PI*(wave.freq*time-s*wave.wavelength))+bend*len*s*s;
+      if(curvFn)off+=curvFn(s,time)*len*2.2;
+      const p=this.pts[i];
+      p.x=x-cos*d-sin*off;
+      p.y=y-sin*d+cos*off;
+    }
+    for(let i=0;i<n;i++){
+      const a=this.pts[Math.max(0,i-1)],b=this.pts[Math.min(n-1,i+1)];
+      this.pts[i].a=Math.atan2(a.y-b.y,a.x-b.x);
     }
   }
 }
